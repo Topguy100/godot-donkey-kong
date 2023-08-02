@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dvqflp3ejddjg"
-path="res://.godot/imported/Arcade - Donkey Kong - Cinematics.png-4697f91b4450fc7bdeb76534df9ed900.ctex"
+uid="uid://m86j05mh0cxs"
+path="res://.godot/imported/platforms-peach.png-5f8fd28e0b308492ad7ba5f74445ebaf.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/Arcade - Donkey Kong - Cinematics.png"
-dest_files=["res://.godot/imported/Arcade - Donkey Kong - Cinematics.png-4697f91b4450fc7bdeb76534df9ed900.ctex"]
+source_file="res://assets/tiles/platforms-peach.png"
+dest_files=["res://.godot/imported/platforms-peach.png-5f8fd28e0b308492ad7ba5f74445ebaf.ctex"]
 
 [params]
 

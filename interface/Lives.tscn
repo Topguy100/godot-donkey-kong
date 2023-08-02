@@ -1,0 +1,31 @@
+[gd_scene load_steps=5 format=3 uid="uid://c61xlueu1agd"]
+
+[ext_resource type="Texture2D" uid="uid://3j8rqyyg3fvm" path="res://assets/tiles/interface.png" id="1_p42tv"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_wtgvj"]
+texture = ExtResource("1_p42tv")
+texture_region_size = Vector2i(24, 24)
+1:3/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_6tp0c"]
+tile_size = Vector2i(24, 24)
+sources/0 = SubResource("TileSetAtlasSource_wtgvj")
+
+[sub_resource type="GDScript" id="GDScript_cgq2e"]
+script/source = "extends TileMap
+
+@export var lives := 3
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta):
+	self.clear_layer(0)
+	
+	for cell_x in range(self.lives):
+		self.set_cell(0, Vector2i(cell_x, 0), 0, Vector2i(1, 3))
+"
+
+[node name="Lives" type="TileMap"]
+tile_set = SubResource("TileSet_6tp0c")
+cell_quadrant_size = 24
+format = 2
+script = SubResource("GDScript_cgq2e")

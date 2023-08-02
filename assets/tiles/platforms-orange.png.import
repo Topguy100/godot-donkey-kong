@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bia36133bwao6"
-path="res://.godot/imported/Arcade - Donkey Kong - 25 M50 M.png-99e1b8b1ba8a654e6c68f2c9a0bb778e.ctex"
+uid="uid://dmr3st0s15kea"
+path="res://.godot/imported/platforms-orange.png-8170b0488b1de80c380d991aecc12b0a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/Arcade - Donkey Kong - 25 M50 M.png"
-dest_files=["res://.godot/imported/Arcade - Donkey Kong - 25 M50 M.png-99e1b8b1ba8a654e6c68f2c9a0bb778e.ctex"]
+source_file="res://assets/tiles/platforms-orange.png"
+dest_files=["res://.godot/imported/platforms-orange.png-8170b0488b1de80c380d991aecc12b0a.ctex"]
 
 [params]
 

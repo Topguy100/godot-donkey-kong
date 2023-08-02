@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bdvoww3wwoir6"
-path="res://.godot/imported/Arcade - Donkey Kong - Fonts & Rankings.png-519677e49d684ed86af6200b008ede73.ctex"
+uid="uid://32lj3jh4v0hg"
+path="res://.godot/imported/platforms-blue.png-915176128b260665f46baae20df76b9c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/Arcade - Donkey Kong - Fonts & Rankings.png"
-dest_files=["res://.godot/imported/Arcade - Donkey Kong - Fonts & Rankings.png-519677e49d684ed86af6200b008ede73.ctex"]
+source_file="res://assets/tiles/platforms-blue.png"
+dest_files=["res://.godot/imported/platforms-blue.png-915176128b260665f46baae20df76b9c.ctex"]
 
 [params]
 

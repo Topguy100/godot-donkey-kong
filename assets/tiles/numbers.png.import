@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bhv4mjlwv3dr0"
-path="res://.godot/imported/Arcade - Donkey Kong - 75 M100 M.png-71ec7c02ca32b443e3c29a9efc432a34.ctex"
+uid="uid://ct5xarxamy0ct"
+path="res://.godot/imported/numbers.png-41155840b7ed63a31ab7192288afd1bf.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/Arcade - Donkey Kong - 75 M100 M.png"
-dest_files=["res://.godot/imported/Arcade - Donkey Kong - 75 M100 M.png-71ec7c02ca32b443e3c29a9efc432a34.ctex"]
+source_file="res://assets/tiles/numbers.png"
+dest_files=["res://.godot/imported/numbers.png-41155840b7ed63a31ab7192288afd1bf.ctex"]
 
 [params]
 
