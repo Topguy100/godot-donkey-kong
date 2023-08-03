@@ -9,43 +9,106 @@ script/source = "extends CharacterBody2D
 const SPEED = 150.0
 const JUMP_VELOCITY = -275.0
 
-enum State { AIR, FLOOR }
+enum State { AIR, FLOOR, LADDER }
 var state = State.AIR
 
 # Get the gravity from the project settings to be synced with RigidBody nodes.
 var gravity = ProjectSettings.get_setting(\"physics/2d/default_gravity\")
 
-@onready var sprite = self.get_node(\"Sprite2D\")
-@onready var anim = self.get_node(\"AnimationPlayer\")
-
 func _physics_process(delta):
 	match state:
 		State.AIR:
-			if is_on_floor():
-				state = State.FLOOR
-				
-			velocity.y += gravity * delta
+			air_physics(delta)
 		State.FLOOR:
-			if Input.is_action_just_pressed(\"ui_accept\"):
-				velocity.y = JUMP_VELOCITY
-				state = State.AIR
-
-			var direction = Input.get_axis(\"ui_left\", \"ui_right\")
-			
-			if direction == 1:
-				sprite.flip_h = true
-			elif direction == -1:
-				sprite.flip_h = false
-				
-			if direction:
-				anim.play(\"running\")
-			else:
-				anim.stop()
-				
-			velocity.x = direction * SPEED
-			velocity.y += gravity * delta
+			floor_physics(delta)
+		State.LADDER:
+			ladder_physics(delta)
 
 	move_and_slide()
+
+func air_physics(delta):
+	# Return to the floor after a jump
+	if is_on_floor():
+		state = State.FLOOR
+		return
+	
+	# Only update the y velocity during a jump - no direction changes	
+	velocity.y += gravity * delta
+	
+func floor_physics(delta):
+	# Move to a jump when pressing the jump key
+	if Input.is_action_just_pressed(\"ui_accept\"):
+		velocity.y = JUMP_VELOCITY
+		state = State.AIR
+		return
+
+	# Get the state of all four direction keys
+	var x_axis = Input.get_axis(\"ui_left\", \"ui_right\")
+	var y_axis = Input.get_axis(\"ui_up\", \"ui_down\")
+	
+	# Check if getting on the bottom of a ladder
+	if y_axis == -1 and $LadderChecker.is_colliding():
+		state = State.LADDER
+		return
+	
+	# Check if getting on the top of a ladder
+	if y_axis == 1 and $LadderBelowChecker.is_colliding():
+		# Disable collisions with platforms temporarily
+		self.set_collision_mask_value(2, false)
+		$CollisionEnableTimer.start()
+		velocity.y = SPEED
+		state = State.LADDER
+		return
+		
+	
+	# Ensure Mario is facing the correct direction
+	if x_axis == 1:
+		$Sprite2D.flip_h = true
+	elif x_axis == -1:
+		$Sprite2D.flip_h = false
+	
+	if x_axis:
+		$AnimationPlayer.play(\"running\")
+	else:
+		$AnimationPlayer.stop()
+		
+	velocity.x = x_axis * SPEED
+	velocity.y += gravity * delta
+
+func ladder_physics(delta):
+	# Prevent sideways movement and snap to the centre of the ladder
+	velocity.x = 0
+	move_to_centre_of_ladder()
+	
+	# Get the state of all four direction keys
+	var direction = Input.get_axis(\"ui_up\", \"ui_down\")
+	
+	var exited_bottom_of_ladder = is_on_floor() and direction == 1
+	var exited_top_of_ladder = $PlatformBelowChecker.is_colliding() and not $LadderChecker.is_colliding()
+	if exited_bottom_of_ladder or exited_top_of_ladder:
+		velocity.y = 0
+		state = State.FLOOR
+		return
+	
+	var start_moving_up_on_ladder = $LadderAboveChecker.is_colliding() and direction == -1
+	var start_moving_down_on_ladder = $LadderBelowChecker.is_colliding() and direction == 1
+	var mid_moving_on_ladder = $LadderChecker.is_colliding()
+	if start_moving_up_on_ladder or start_moving_down_on_ladder or mid_moving_on_ladder:
+		velocity.y = direction * SPEED
+	else:
+		velocity.y = 0
+	
+# Moves Mario to line up with the ladder perfectly before ascent or descent
+func move_to_centre_of_ladder():
+	if $LadderChecker.is_colliding():
+		var tile_map : TileMap = $LadderChecker.get_collider()
+		var rid = $LadderChecker.get_collider_rid()
+		var tile_coord = tile_map.get_coords_for_body_rid(rid)
+		position.x = (tile_coord.x + 0.5) * tile_map.tile_set.tile_size.x + tile_map.position.x
+
+
+func reenable_platform_collision():
+	self.set_collision_mask_value(2, true)
 "
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_xsfub"]
@@ -85,9 +148,35 @@ shape = SubResource("CapsuleShape2D_xsfub")
 texture = ExtResource("1_l1u6q")
 hframes = 3
 
+[node name="LadderAboveChecker" type="RayCast2D" parent="."]
+position = Vector2(2.08165e-12, 8)
+target_position = Vector2(2.08165e-12, -12)
+collision_mask = 4
+
+[node name="LadderChecker" type="RayCast2D" parent="."]
+position = Vector2(2.08165e-12, 6)
+target_position = Vector2(2.08165e-12, 18)
+collision_mask = 4
+hit_from_inside = true
+
+[node name="LadderBelowChecker" type="RayCast2D" parent="."]
+position = Vector2(2.08165e-12, 22)
+target_position = Vector2(2.08165e-12, 12)
+collision_mask = 4
+
+[node name="PlatformBelowChecker" type="RayCast2D" parent="."]
+position = Vector2(2.08165e-12, 24)
+target_position = Vector2(2.08165e-12, 12)
+collision_mask = 2
+
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 root_node = NodePath("../Sprite2D")
 autoplay = "running"
 libraries = {
 "": SubResource("AnimationLibrary_met8n")
 }
+
+[node name="CollisionEnableTimer" type="Timer" parent="."]
+wait_time = 0.2
+
+[connection signal="timeout" from="CollisionEnableTimer" to="." method="reenable_platform_collision"]
