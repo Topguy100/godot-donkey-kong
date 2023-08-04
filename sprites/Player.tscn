@@ -48,6 +48,7 @@ func floor_physics(delta):
 	
 	# Check if getting on the bottom of a ladder
 	if y_axis == -1 and $LadderChecker.is_colliding():
+		velocity = Vector2(0, -SPEED)
 		state = State.LADDER
 		return
 	
@@ -56,7 +57,7 @@ func floor_physics(delta):
 		# Disable collisions with platforms temporarily
 		self.set_collision_mask_value(2, false)
 		$CollisionEnableTimer.start()
-		velocity.y = SPEED
+		velocity = Vector2(0, SPEED)
 		state = State.LADDER
 		return
 		
@@ -149,24 +150,24 @@ texture = ExtResource("1_l1u6q")
 hframes = 3
 
 [node name="LadderAboveChecker" type="RayCast2D" parent="."]
-position = Vector2(2.08165e-12, 8)
-target_position = Vector2(2.08165e-12, -12)
+position = Vector2(2.08165e-12, 12)
+target_position = Vector2(2.08165e-12, -8)
 collision_mask = 4
 
 [node name="LadderChecker" type="RayCast2D" parent="."]
-position = Vector2(2.08165e-12, 6)
-target_position = Vector2(2.08165e-12, 18)
+position = Vector2(2.08165e-12, 12)
+target_position = Vector2(2.08165e-12, 12)
 collision_mask = 4
 hit_from_inside = true
 
 [node name="LadderBelowChecker" type="RayCast2D" parent="."]
-position = Vector2(2.08165e-12, 22)
-target_position = Vector2(2.08165e-12, 12)
+position = Vector2(2.08165e-12, 24)
+target_position = Vector2(2.08165e-12, 8)
 collision_mask = 4
 
 [node name="PlatformBelowChecker" type="RayCast2D" parent="."]
 position = Vector2(2.08165e-12, 24)
-target_position = Vector2(2.08165e-12, 12)
+target_position = Vector2(2.08165e-12, 8)
 collision_mask = 2
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
