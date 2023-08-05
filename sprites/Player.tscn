@@ -1,6 +1,6 @@
-[gd_scene load_steps=6 format=3 uid="uid://chadcflauv6ap"]
+[gd_scene load_steps=12 format=3 uid="uid://chadcflauv6ap"]
 
-[ext_resource type="Texture2D" uid="uid://0tqax7gl5m6d" path="res://assets/player/running.png" id="1_l1u6q"]
+[ext_resource type="Texture2D" uid="uid://idelqjnu7633" path="res://assets/player/Mario.png" id="1_kcfcy"]
 
 [sub_resource type="GDScript" id="GDScript_sy84s"]
 script/source = "extends CharacterBody2D
@@ -11,6 +11,8 @@ const JUMP_VELOCITY = -275.0
 
 enum State { AIR, FLOOR, LADDER }
 var state = State.AIR
+
+var skid_landing = false
 
 # Get the gravity from the project settings to be synced with RigidBody nodes.
 var gravity = ProjectSettings.get_setting(\"physics/2d/default_gravity\")
@@ -27,16 +29,27 @@ func _physics_process(delta):
 	move_and_slide()
 
 func air_physics(delta):
+	$LandingTimer.stop()
+	
+	$AnimationPlayer.play(\"jump\")
+	
+	# Only update the y velocity during a jump - no direction changes
+	velocity.y += gravity * delta
+	
 	# Return to the floor after a jump
 	if is_on_floor():
+		if velocity.x != 0:
+			skid_landing = true
+			$AnimationPlayer.play(\"jump_end\")
+			$LandingTimer.start()
+		else:
+			$AnimationPlayer.play(\"running\")
+		
 		state = State.FLOOR
 		return
 	
-	# Only update the y velocity during a jump - no direction changes	
-	velocity.y += gravity * delta
-	
 func floor_physics(delta):
-	# Move to a jump when pressing the jump key
+	# Move to AIR when pressing the jump key
 	if Input.is_action_just_pressed(\"ui_accept\"):
 		velocity.y = JUMP_VELOCITY
 		state = State.AIR
@@ -61,27 +74,20 @@ func floor_physics(delta):
 	elif x_axis == -1:
 		$Sprite2D.flip_h = false
 	
-	if x_axis:
+	if not skid_landing:
 		$AnimationPlayer.play(\"running\")
-	else:
-		$AnimationPlayer.stop()
+		
+		if not x_axis:
+			$AnimationPlayer.stop()
 		
 	velocity.x = x_axis * SPEED
 	velocity.y += gravity * delta
 
 func ladder_physics(_delta):
-	# Do checks for switching to FLOOR state 
-	var x_axis = Input.get_axis(\"ui_left\", \"ui_right\")
-	if (x_axis and
+	var at_end_of_ladder = (
 		$PlatformBelowChecker.is_colliding() and
 		($LadderBottomChecker.is_colliding() or $LadderTopChecker.is_colliding())
-	):
-		# Restart checking for platform collisions while on the floor
-		self.set_collision_mask_value(2, true)
-		
-		velocity.y = 0
-		state = State.FLOOR
-		return
+	)
 	
 	# Get the state of the up and down keys
 	var y_axis = Input.get_axis(\"ui_up\", \"ui_down\")
@@ -89,8 +95,29 @@ func ladder_physics(_delta):
 		(y_axis == 1 and not $LadderBottomChecker.is_colliding())
 	):
 		velocity.y = y_axis * SPEED
+		$AnimationPlayer.play(\"climbing\")
 	else:
 		velocity.y = 0
+		
+		if at_end_of_ladder:
+			$AnimationPlayer.play(\"ladder_end\")
+		else:
+			$AnimationPlayer.pause()
+	
+	# Transition to AIR from end of ladder
+	if Input.is_action_just_pressed(\"ui_accept\") and at_end_of_ladder:
+		self.set_collision_mask_value(2, true)
+		velocity.y = JUMP_VELOCITY
+		state = State.AIR
+		return
+		
+	# Do checks for switching to FLOOR state 
+	var x_axis = Input.get_axis(\"ui_left\", \"ui_right\")
+	if x_axis and at_end_of_ladder:
+		# Restart checking for platform collisions while on the floor
+		self.set_collision_mask_value(2, true)
+		state = State.FLOOR
+		return
 
 func switch_to_ladder_state(checker):
 	# Stop checking for platform collisions while on ladders
@@ -108,6 +135,10 @@ func move_to_centre_of_ladder(checker: RayCast2D):
 	var rid = checker.get_collider_rid()
 	var tile_coord = tile_map.get_coords_for_body_rid(rid)
 	position.x = (tile_coord.x + 0.5) * tile_map.tile_set.tile_size.x + tile_map.position.x
+
+
+func _on_landing_timer_timeout():
+	skid_landing = false
 "
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_xsfub"]
@@ -116,6 +147,24 @@ height = 48.0
 
 [sub_resource type="Animation" id="Animation_phuvu"]
 resource_name = "running"
+length = 0.18
+loop_mode = 1
+step = 0.06
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.06, 0.12),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [0, 1, 2]
+}
+
+[sub_resource type="Animation" id="Animation_bmmu7"]
+resource_name = "climbing"
 length = 0.3
 loop_mode = 1
 tracks/0/type = "value"
@@ -125,14 +174,160 @@ tracks/0/path = NodePath(".:frame")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.1, 0.2),
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [3]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:flip_h")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.15),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [false, true]
+}
+
+[sub_resource type="Animation" id="Animation_jltwj"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:flip_h")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [false]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:frame")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [16]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath(".:flip_v")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [false]
+}
+
+[sub_resource type="Animation" id="Animation_kcmuu"]
+resource_name = "ladder_end"
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [6]
+}
+
+[sub_resource type="Animation" id="Animation_fd5f4"]
+resource_name = "jump"
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [13]
+}
+
+[sub_resource type="Animation" id="Animation_24x35"]
+resource_name = "jump_end"
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [14]
+}
+
+[sub_resource type="Animation" id="Animation_bl034"]
+resource_name = "death"
+length = 1.2
+step = 0.2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.2, 0.4, 0.6, 0.8, 1, 1.2),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [15, 16, 15, 16, 15, 16, 17]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:flip_h")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.4, 0.8),
 "transitions": PackedFloat32Array(1, 1, 1),
 "update": 1,
-"values": [0, 1, 2]
+"values": [false, true, false]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath(".:flip_v")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.4, 0.8),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [false, true, false]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_met8n"]
 _data = {
+"RESET": SubResource("Animation_jltwj"),
+"climbing": SubResource("Animation_bmmu7"),
+"death": SubResource("Animation_bl034"),
+"jump": SubResource("Animation_fd5f4"),
+"jump_end": SubResource("Animation_24x35"),
+"ladder_end": SubResource("Animation_kcmuu"),
 "running": SubResource("Animation_phuvu")
 }
 
@@ -144,8 +339,9 @@ script = SubResource("GDScript_sy84s")
 shape = SubResource("CapsuleShape2D_xsfub")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-texture = ExtResource("1_l1u6q")
-hframes = 3
+texture = ExtResource("1_kcfcy")
+hframes = 18
+frame = 16
 
 [node name="LadderTopChecker" type="RayCast2D" parent="."]
 position = Vector2(0, 21)
@@ -168,3 +364,8 @@ autoplay = "running"
 libraries = {
 "": SubResource("AnimationLibrary_met8n")
 }
+
+[node name="LandingTimer" type="Timer" parent="."]
+wait_time = 0.15
+
+[connection signal="timeout" from="LandingTimer" to="." method="_on_landing_timer_timeout"]
