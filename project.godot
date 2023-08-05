@@ -22,6 +22,10 @@ window/size/viewport_height=776
 window/size/resizable=false
 window/dpi/allow_hidpi=false
 
+[filesystem]
+
+import/blender/enabled=false
+
 [layer_names]
 
 2d_render/layer_1="player"
@@ -29,7 +33,8 @@ window/dpi/allow_hidpi=false
 2d_render/layer_3="ladders"
 2d_physics/layer_1="Player"
 2d_physics/layer_2="Platforms"
-2d_physics/layer_3="Ladders"
+2d_physics/layer_3="Ladder Bottoms"
+2d_physics/layer_4="Ladder Tops"
 
 [rendering]
 

@@ -42,25 +42,18 @@ func floor_physics(delta):
 		state = State.AIR
 		return
 
-	# Get the state of all four direction keys
+	# Get inputs
 	var x_axis = Input.get_axis(\"ui_left\", \"ui_right\")
 	var y_axis = Input.get_axis(\"ui_up\", \"ui_down\")
-	
-	# Check if getting on the bottom of a ladder
-	if y_axis == -1 and $LadderChecker.is_colliding():
-		velocity = Vector2(0, -SPEED)
-		state = State.LADDER
+
+	# Do checks for switching to LADDER state
+	if y_axis == -1 and not x_axis and $LadderBottomChecker.is_colliding():
+		switch_to_ladder_state($LadderBottomChecker)
 		return
 	
-	# Check if getting on the top of a ladder
-	if y_axis == 1 and $LadderBelowChecker.is_colliding():
-		# Disable collisions with platforms temporarily
-		self.set_collision_mask_value(2, false)
-		$CollisionEnableTimer.start()
-		velocity = Vector2(0, SPEED)
-		state = State.LADDER
+	if y_axis == 1 and not x_axis and $LadderTopChecker.is_colliding():
+		switch_to_ladder_state($LadderTopChecker)
 		return
-		
 	
 	# Ensure Mario is facing the correct direction
 	if x_axis == 1:
@@ -76,40 +69,45 @@ func floor_physics(delta):
 	velocity.x = x_axis * SPEED
 	velocity.y += gravity * delta
 
-func ladder_physics(delta):
-	# Prevent sideways movement and snap to the centre of the ladder
-	velocity.x = 0
-	move_to_centre_of_ladder()
-	
-	# Get the state of all four direction keys
-	var direction = Input.get_axis(\"ui_up\", \"ui_down\")
-	
-	var exited_bottom_of_ladder = is_on_floor() and direction == 1
-	var exited_top_of_ladder = $PlatformBelowChecker.is_colliding() and not $LadderChecker.is_colliding()
-	if exited_bottom_of_ladder or exited_top_of_ladder:
+func ladder_physics(_delta):
+	# Do checks for switching to FLOOR state 
+	var x_axis = Input.get_axis(\"ui_left\", \"ui_right\")
+	if (x_axis and
+		$PlatformBelowChecker.is_colliding() and
+		($LadderBottomChecker.is_colliding() or $LadderTopChecker.is_colliding())
+	):
+		# Restart checking for platform collisions while on the floor
+		self.set_collision_mask_value(2, true)
+		
 		velocity.y = 0
 		state = State.FLOOR
 		return
 	
-	var start_moving_up_on_ladder = $LadderAboveChecker.is_colliding() and direction == -1
-	var start_moving_down_on_ladder = $LadderBelowChecker.is_colliding() and direction == 1
-	var mid_moving_on_ladder = $LadderChecker.is_colliding()
-	if start_moving_up_on_ladder or start_moving_down_on_ladder or mid_moving_on_ladder:
-		velocity.y = direction * SPEED
+	# Get the state of the up and down keys
+	var y_axis = Input.get_axis(\"ui_up\", \"ui_down\")
+	if ((y_axis == -1 and not $LadderTopChecker.is_colliding()) or
+		(y_axis == 1 and not $LadderBottomChecker.is_colliding())
+	):
+		velocity.y = y_axis * SPEED
 	else:
 		velocity.y = 0
+
+func switch_to_ladder_state(checker):
+	# Stop checking for platform collisions while on ladders
+	self.set_collision_mask_value(2, false)
 	
+	# Prevent sideways movement and snap to the centre of the ladder
+	velocity.x = 0
+	move_to_centre_of_ladder(checker)
+
+	state = State.LADDER
+
 # Moves Mario to line up with the ladder perfectly before ascent or descent
-func move_to_centre_of_ladder():
-	if $LadderChecker.is_colliding():
-		var tile_map : TileMap = $LadderChecker.get_collider()
-		var rid = $LadderChecker.get_collider_rid()
-		var tile_coord = tile_map.get_coords_for_body_rid(rid)
-		position.x = (tile_coord.x + 0.5) * tile_map.tile_set.tile_size.x + tile_map.position.x
-
-
-func reenable_platform_collision():
-	self.set_collision_mask_value(2, true)
+func move_to_centre_of_ladder(checker: RayCast2D):
+	var tile_map : TileMap = checker.get_collider()
+	var rid = checker.get_collider_rid()
+	var tile_coord = tile_map.get_coords_for_body_rid(rid)
+	position.x = (tile_coord.x + 0.5) * tile_map.tile_set.tile_size.x + tile_map.position.x
 "
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_xsfub"]
@@ -149,25 +147,19 @@ shape = SubResource("CapsuleShape2D_xsfub")
 texture = ExtResource("1_l1u6q")
 hframes = 3
 
-[node name="LadderAboveChecker" type="RayCast2D" parent="."]
-position = Vector2(2.08165e-12, 12)
-target_position = Vector2(2.08165e-12, -8)
-collision_mask = 4
+[node name="LadderTopChecker" type="RayCast2D" parent="."]
+position = Vector2(0, 21)
+target_position = Vector2(0, 3)
+collision_mask = 8
 
-[node name="LadderChecker" type="RayCast2D" parent="."]
-position = Vector2(2.08165e-12, 12)
-target_position = Vector2(2.08165e-12, 12)
-collision_mask = 4
-hit_from_inside = true
-
-[node name="LadderBelowChecker" type="RayCast2D" parent="."]
-position = Vector2(2.08165e-12, 24)
-target_position = Vector2(2.08165e-12, 8)
+[node name="LadderBottomChecker" type="RayCast2D" parent="."]
+position = Vector2(0, 21)
+target_position = Vector2(0, 3)
 collision_mask = 4
 
 [node name="PlatformBelowChecker" type="RayCast2D" parent="."]
-position = Vector2(2.08165e-12, 24)
-target_position = Vector2(2.08165e-12, 8)
+position = Vector2(0, 24)
+target_position = Vector2(0, 3)
 collision_mask = 2
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
@@ -176,8 +168,3 @@ autoplay = "running"
 libraries = {
 "": SubResource("AnimationLibrary_met8n")
 }
-
-[node name="CollisionEnableTimer" type="Timer" parent="."]
-wait_time = 0.2
-
-[connection signal="timeout" from="CollisionEnableTimer" to="." method="reenable_platform_collision"]

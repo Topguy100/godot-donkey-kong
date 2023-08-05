@@ -60,12 +60,12 @@ enum Colour { WHITE = 0, BLUE, CYAN, YELLOW }
 @export var number := 0
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
+func _process(_delta):
 	self.clear_layer(0)
 	
 	for cell_x in range(self.digits):
-		var scale = pow(10, self.digits - 1 - cell_x)
-		var digit = floori(self.number / scale) % 10
+		var index_scaler = pow(10, self.digits - 1 - cell_x)
+		var digit = floori(self.number / index_scaler) % 10
 		self.set_cell(0, Vector2i(cell_x, 0), 0, Vector2i(digit, self.colour))
 "
 
