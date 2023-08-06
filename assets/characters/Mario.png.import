@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://idelqjnu7633"
-path="res://.godot/imported/Mario.png-048033b81a933f0da9c659e005bf5fe4.ctex"
+path="res://.godot/imported/Mario.png-6ea2b19a012a496c8fad9d703919bb6a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/player/Mario.png"
-dest_files=["res://.godot/imported/Mario.png-048033b81a933f0da9c659e005bf5fe4.ctex"]
+source_file="res://assets/characters/Mario.png"
+dest_files=["res://.godot/imported/Mario.png-6ea2b19a012a496c8fad9d703919bb6a.ctex"]
 
 [params]
 
