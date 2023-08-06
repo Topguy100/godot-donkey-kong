@@ -1,0 +1,95 @@
+[gd_scene load_steps=6 format=3 uid="uid://u87pjoxlflps"]
+
+[ext_resource type="Texture2D" uid="uid://c60kvbne1okf7" path="res://assets/objects/Regular Barrel.png" id="1_814dc"]
+
+[sub_resource type="GDScript" id="GDScript_74ut7"]
+script/source = "extends CharacterBody2D
+
+const SPEED = 175.0
+enum State { AIR, FLOOR, LADDER }
+
+@export var direction = 1
+@export var state = State.FLOOR
+
+var gravity = ProjectSettings.get_setting(\"physics/2d/default_gravity\")
+var has_bounced = true
+
+func _ready():
+	velocity = Vector2(SPEED * direction, 5)
+
+func _physics_process(delta):
+	match state:
+		State.AIR:
+			air_physics(delta)
+		State.FLOOR:
+			floor_physics(delta)
+	
+	move_and_slide()
+
+func air_physics(delta):
+	velocity.y += gravity * delta
+	velocity.x = move_toward(velocity.x, SPEED * direction * 0.3, 25)
+	
+	if is_on_floor():
+		velocity.x = 0
+		if has_bounced:
+			has_bounced = false
+			direction *= -1
+			state = State.FLOOR
+		else:
+			velocity = Vector2(0, -150)
+			has_bounced = true
+
+func floor_physics(delta):
+	velocity.x = move_toward(velocity.x, SPEED * direction, 25)
+	velocity.y += gravity * delta
+	
+	if is_freefalling():
+		state = State.AIR
+
+func is_freefalling():
+	for detector in get_tree().get_nodes_in_group(\"BarrelPlatformDetectors\") as Array[RayCast2D]:
+		if detector.is_colliding():
+			return false
+	
+	return true
+"
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_tvcq3"]
+radius = 15.0
+
+[sub_resource type="Animation" id="Animation_11ply"]
+resource_name = "rolling_left"
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_7kvpf"]
+_data = {
+"rolling_left": SubResource("Animation_11ply")
+}
+
+[node name="Barrel" type="CharacterBody2D"]
+script = SubResource("GDScript_74ut7")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_814dc")
+hframes = 2
+vframes = 3
+
+[node name="RollingCollisionShape" type="CollisionShape2D" parent="."]
+rotation = 1.5708
+shape = SubResource("CircleShape2D_tvcq3")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+root_node = NodePath("")
+libraries = {
+"": SubResource("AnimationLibrary_7kvpf")
+}
+
+[node name="PlatformDetectorLeft" type="RayCast2D" parent="." groups=["BarrelPlatformDetectors"]]
+position = Vector2(-15, 0)
+target_position = Vector2(0, 23)
+collision_mask = 2
+
+[node name="PlatformDetectorRight" type="RayCast2D" parent="." groups=["BarrelPlatformDetectors"]]
+position = Vector2(15, 0)
+target_position = Vector2(0, 22)
+collision_mask = 2

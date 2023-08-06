@@ -35,6 +35,7 @@ import/blender/enabled=false
 2d_physics/layer_2="Platforms"
 2d_physics/layer_3="Ladder Bottoms"
 2d_physics/layer_4="Ladder Tops"
+2d_physics/layer_8="Invisible Barriers"
 
 [rendering]
 
