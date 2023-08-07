@@ -7,7 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://c61xlueu1agd" path="res://interface/Lives.tscn" id="3_jaive"]
 [ext_resource type="PackedScene" uid="uid://c65mp7opiaw83" path="res://sprites/Donkey Kong.tscn" id="5_o4rb1"]
 [ext_resource type="Texture2D" uid="uid://d35n2rd0jotgv" path="res://assets/objects/Barrel Stack.png" id="5_qmcuh"]
-[ext_resource type="PackedScene" uid="uid://u87pjoxlflps" path="res://sprites/Barrel.tscn" id="8_6aouw"]
+[ext_resource type="PackedScene" uid="uid://u87pjoxlflps" path="res://sprites/Regular Barrel.tscn" id="8_6aouw"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_lf0yl"]
 texture = ExtResource("1_o3f3q")

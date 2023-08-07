@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://u87pjoxlflps"]
+[gd_scene load_steps=19 format=3 uid="uid://u87pjoxlflps"]
 
 [ext_resource type="Texture2D" uid="uid://c60kvbne1okf7" path="res://assets/objects/Regular Barrel.png" id="1_814dc"]
 
@@ -8,13 +8,14 @@ script/source = "extends CharacterBody2D
 const SPEED = 175.0
 const FALLING_DELTA_X = 1500.0
 
-enum State { AIR, FLOOR, LADDER }
+enum State { FREEFALL, BOUNCE, ROLL, TUMBLE }
 
 @export var direction = 1
-@export var state = State.FLOOR
+@export var state = State.ROLL
+@export var tumble_chance = 25
 
 var gravity = ProjectSettings.get_setting(\"physics/2d/default_gravity\")
-var has_bounced = true
+var over_ladder = false
 
 @onready var anim_tree = $AnimationTree
 
@@ -23,36 +24,68 @@ func _ready():
 
 func _physics_process(delta):
 	match state:
-		State.AIR:
-			air_physics(delta)
-		State.FLOOR:
-			floor_physics(delta)
+		State.FREEFALL:
+			freefall_physics(delta)
+		State.BOUNCE:
+			bounce_physics(delta)
+		State.ROLL:
+			roll_physics(delta)
+		State.TUMBLE:
+			tumble_physics(delta)
 	
 	anim_tree.set(\"parameters/StateMachine/Rolling/blend_position\", velocity.x)
 	anim_tree.set(\"parameters/TimeScale/scale\", velocity.length() / SPEED)
 	
 	move_and_slide()
 
-func air_physics(delta):
-	velocity.y += gravity * delta
+func freefall_physics(delta):
 	velocity.x = move_toward(velocity.x, SPEED * direction * 0.3, FALLING_DELTA_X * delta)
+	velocity.y += gravity * delta
 	
 	if is_on_floor():
-		velocity.x = 0
-		if has_bounced:
-			has_bounced = false
-			direction *= -1
-			state = State.FLOOR
-		else:
-			velocity = Vector2(0, -150)
-			has_bounced = true
+		velocity = Vector2(0, -150)
+		direction *= -1
+		state = State.BOUNCE
+			
+func bounce_physics(delta):
+	velocity.x = direction * 0.6 * SPEED
+	velocity.y += gravity * delta
+	
+	if is_on_floor():
+		state = State.ROLL
 
-func floor_physics(delta):
+func roll_physics(delta):
 	velocity.x = move_toward(velocity.x, SPEED * direction, FALLING_DELTA_X * delta)
 	velocity.y += gravity * delta
 	
 	if is_freefalling():
-		state = State.AIR
+		state = State.FREEFALL
+		return
+		
+	if ($LadderTopChecker.is_colliding() and
+		not over_ladder and
+		randi_range(0, 99) < tumble_chance
+	):
+		self.set_collision_mask_value(2, false)
+		
+		move_to_centre_of_ladder()
+		velocity = Vector2.ZERO
+
+		state = State.TUMBLE
+		return
+		
+	over_ladder = $LadderTopChecker.is_colliding()
+
+func tumble_physics(delta):
+	velocity.x = 0
+	velocity.y = SPEED
+	
+	if $PlatformBelowChecker.is_colliding() and $LadderBottomChecker.is_colliding():
+		self.set_collision_mask_value(2, true)
+		direction *= -1
+		velocity = Vector2(direction * SPEED, 0)
+		state = State.ROLL
+		return
 
 func is_freefalling():
 	for detector in get_tree().get_nodes_in_group(\"BarrelPlatformDetectors\") as Array[RayCast2D]:
@@ -60,10 +93,31 @@ func is_freefalling():
 			return false
 	
 	return true
+	
+func move_to_centre_of_ladder():
+	var tile_map : TileMap = $LadderTopChecker.get_collider()
+	var rid = $LadderTopChecker.get_collider_rid()
+	var tile_coord = tile_map.get_coords_for_body_rid(rid)
+	position.x = (tile_coord.x + 0.5) * tile_map.tile_set.tile_size.x + tile_map.position.x
 "
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_tvcq3"]
 radius = 15.0
+
+[sub_resource type="Animation" id="Animation_vyqj1"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
 
 [sub_resource type="Animation" id="Animation_11ply"]
 resource_name = "rolling_left"
@@ -99,8 +153,10 @@ tracks/0/keys = {
 "values": [0, 1, 2, 3]
 }
 
-[sub_resource type="Animation" id="Animation_vyqj1"]
-length = 0.001
+[sub_resource type="Animation" id="Animation_7qgjw"]
+resource_name = "tumbling"
+length = 0.2
+loop_mode = 1
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -108,17 +164,18 @@ tracks/0/path = NodePath(".:frame")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
+"times": PackedFloat32Array(0, 0.1),
+"transitions": PackedFloat32Array(1, 1),
 "update": 1,
-"values": [0]
+"values": [4, 5]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_7kvpf"]
 _data = {
 "RESET": SubResource("Animation_vyqj1"),
 "rolling_left": SubResource("Animation_11ply"),
-"rolling_right": SubResource("Animation_o67k3")
+"rolling_right": SubResource("Animation_o67k3"),
+"tumbling": SubResource("Animation_7qgjw")
 }
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_lapmw"]
@@ -134,19 +191,32 @@ blend_point_1/node = SubResource("AnimationNodeAnimation_qmx6v")
 blend_point_1/pos = 1.0
 blend_mode = 1
 
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_iae1c"]
+animation = &"tumbling"
+
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_w7lih"]
 advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_u0ewe"]
+advance_mode = 2
+advance_expression = "state == State.TUMBLE"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_mooyk"]
+advance_mode = 2
+advance_expression = "state != State.TUMBLE"
 
 [sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_c6shn"]
 states/Rolling/node = SubResource("AnimationNodeBlendSpace1D_iy5fh")
 states/Rolling/position = Vector2(370.94, 100.622)
-transitions = ["Start", "Rolling", SubResource("AnimationNodeStateMachineTransition_w7lih")]
-graph_offset = Vector2(127.44, -42.255)
+states/Tumbling/node = SubResource("AnimationNodeAnimation_iae1c")
+states/Tumbling/position = Vector2(570.483, 100.311)
+transitions = ["Start", "Rolling", SubResource("AnimationNodeStateMachineTransition_w7lih"), "Rolling", "Tumbling", SubResource("AnimationNodeStateMachineTransition_u0ewe"), "Tumbling", "Rolling", SubResource("AnimationNodeStateMachineTransition_mooyk")]
+graph_offset = Vector2(138.983, -1.95749)
 
 [sub_resource type="AnimationNodeTimeScale" id="AnimationNodeTimeScale_wyhcj"]
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_sane2"]
-graph_offset = Vector2(-242.88, 0)
+graph_offset = Vector2(-186.24, 105.6)
 nodes/StateMachine/node = SubResource("AnimationNodeStateMachine_c6shn")
 nodes/StateMachine/position = Vector2(-90, 130)
 nodes/TimeScale/node = SubResource("AnimationNodeTimeScale_wyhcj")
@@ -161,7 +231,7 @@ texture = ExtResource("1_814dc")
 hframes = 2
 vframes = 3
 
-[node name="RollingCollisionShape" type="CollisionShape2D" parent="."]
+[node name="CollisionShape" type="CollisionShape2D" parent="."]
 rotation = 1.5708
 shape = SubResource("CircleShape2D_tvcq3")
 
@@ -174,6 +244,7 @@ libraries = {
 [node name="AnimationTree" type="AnimationTree" parent="."]
 tree_root = SubResource("AnimationNodeBlendTree_sane2")
 anim_player = NodePath("../AnimationPlayer")
+advance_expression_base_node = NodePath("..")
 active = true
 parameters/StateMachine/Rolling/blend_position = 2.08165e-12
 parameters/TimeScale/scale = 1.0
@@ -186,4 +257,19 @@ collision_mask = 2
 [node name="PlatformDetectorRight" type="RayCast2D" parent="." groups=["BarrelPlatformDetectors"]]
 position = Vector2(15, 0)
 target_position = Vector2(0, 22)
+collision_mask = 2
+
+[node name="LadderTopChecker" type="RayCast2D" parent="."]
+position = Vector2(2.08165e-12, 12)
+target_position = Vector2(2.08165e-12, 3)
+collision_mask = 8
+
+[node name="LadderBottomChecker" type="RayCast2D" parent="."]
+position = Vector2(2.08165e-12, 12)
+target_position = Vector2(2.08165e-12, 3)
+collision_mask = 4
+
+[node name="PlatformBelowChecker" type="RayCast2D" parent="."]
+position = Vector2(2.08165e-12, 15)
+target_position = Vector2(2.08165e-12, 3)
 collision_mask = 2
