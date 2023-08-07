@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://u87pjoxlflps"]
+[gd_scene load_steps=15 format=3 uid="uid://u87pjoxlflps"]
 
 [ext_resource type="Texture2D" uid="uid://c60kvbne1okf7" path="res://assets/objects/Regular Barrel.png" id="1_814dc"]
 
@@ -6,6 +6,8 @@
 script/source = "extends CharacterBody2D
 
 const SPEED = 175.0
+const FALLING_DELTA_X = 1500.0
+
 enum State { AIR, FLOOR, LADDER }
 
 @export var direction = 1
@@ -13,6 +15,8 @@ enum State { AIR, FLOOR, LADDER }
 
 var gravity = ProjectSettings.get_setting(\"physics/2d/default_gravity\")
 var has_bounced = true
+
+@onready var anim_tree = $AnimationTree
 
 func _ready():
 	velocity = Vector2(SPEED * direction, 5)
@@ -24,11 +28,14 @@ func _physics_process(delta):
 		State.FLOOR:
 			floor_physics(delta)
 	
+	anim_tree.set(\"parameters/StateMachine/Rolling/blend_position\", velocity.x)
+	anim_tree.set(\"parameters/TimeScale/scale\", velocity.length() / SPEED)
+	
 	move_and_slide()
 
 func air_physics(delta):
 	velocity.y += gravity * delta
-	velocity.x = move_toward(velocity.x, SPEED * direction * 0.3, 25)
+	velocity.x = move_toward(velocity.x, SPEED * direction * 0.3, FALLING_DELTA_X * delta)
 	
 	if is_on_floor():
 		velocity.x = 0
@@ -41,7 +48,7 @@ func air_physics(delta):
 			has_bounced = true
 
 func floor_physics(delta):
-	velocity.x = move_toward(velocity.x, SPEED * direction, 25)
+	velocity.x = move_toward(velocity.x, SPEED * direction, FALLING_DELTA_X * delta)
 	velocity.y += gravity * delta
 	
 	if is_freefalling():
@@ -60,11 +67,91 @@ radius = 15.0
 
 [sub_resource type="Animation" id="Animation_11ply"]
 resource_name = "rolling_left"
+length = 0.4
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 1,
+"values": [3, 2, 1, 0]
+}
+
+[sub_resource type="Animation" id="Animation_o67k3"]
+resource_name = "rolling_right"
+length = 0.4
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 1,
+"values": [0, 1, 2, 3]
+}
+
+[sub_resource type="Animation" id="Animation_vyqj1"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_7kvpf"]
 _data = {
-"rolling_left": SubResource("Animation_11ply")
+"RESET": SubResource("Animation_vyqj1"),
+"rolling_left": SubResource("Animation_11ply"),
+"rolling_right": SubResource("Animation_o67k3")
 }
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_lapmw"]
+animation = &"rolling_left"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_qmx6v"]
+animation = &"rolling_right"
+
+[sub_resource type="AnimationNodeBlendSpace1D" id="AnimationNodeBlendSpace1D_iy5fh"]
+blend_point_0/node = SubResource("AnimationNodeAnimation_lapmw")
+blend_point_0/pos = -1.0
+blend_point_1/node = SubResource("AnimationNodeAnimation_qmx6v")
+blend_point_1/pos = 1.0
+blend_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_w7lih"]
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_c6shn"]
+states/Rolling/node = SubResource("AnimationNodeBlendSpace1D_iy5fh")
+states/Rolling/position = Vector2(370.94, 100.622)
+transitions = ["Start", "Rolling", SubResource("AnimationNodeStateMachineTransition_w7lih")]
+graph_offset = Vector2(127.44, -42.255)
+
+[sub_resource type="AnimationNodeTimeScale" id="AnimationNodeTimeScale_wyhcj"]
+
+[sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_sane2"]
+graph_offset = Vector2(-242.88, 0)
+nodes/StateMachine/node = SubResource("AnimationNodeStateMachine_c6shn")
+nodes/StateMachine/position = Vector2(-90, 130)
+nodes/TimeScale/node = SubResource("AnimationNodeTimeScale_wyhcj")
+nodes/TimeScale/position = Vector2(120, 130)
+node_connections = [&"output", 0, &"TimeScale", &"TimeScale", 0, &"StateMachine"]
 
 [node name="Barrel" type="CharacterBody2D"]
 script = SubResource("GDScript_74ut7")
@@ -79,10 +166,17 @@ rotation = 1.5708
 shape = SubResource("CircleShape2D_tvcq3")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
-root_node = NodePath("")
+root_node = NodePath("../Sprite2D")
 libraries = {
 "": SubResource("AnimationLibrary_7kvpf")
 }
+
+[node name="AnimationTree" type="AnimationTree" parent="."]
+tree_root = SubResource("AnimationNodeBlendTree_sane2")
+anim_player = NodePath("../AnimationPlayer")
+active = true
+parameters/StateMachine/Rolling/blend_position = 2.08165e-12
+parameters/TimeScale/scale = 1.0
 
 [node name="PlatformDetectorLeft" type="RayCast2D" parent="." groups=["BarrelPlatformDetectors"]]
 position = Vector2(-15, 0)
