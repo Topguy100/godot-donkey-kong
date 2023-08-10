@@ -860,4 +860,4 @@ position = Vector2(219, 237)
 collision_layer = 0
 collision_mask = 2
 direction = -1
-state = 0
+tumble_chance = 0.3

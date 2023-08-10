@@ -1,102 +1,60 @@
-[gd_scene load_steps=19 format=3 uid="uid://u87pjoxlflps"]
+[gd_scene load_steps=24 format=3 uid="uid://u87pjoxlflps"]
 
 [ext_resource type="Texture2D" uid="uid://c60kvbne1okf7" path="res://assets/objects/Regular Barrel.png" id="1_814dc"]
+[ext_resource type="Script" path="res://states/state_machine.gd" id="2_27a6e"]
+[ext_resource type="Script" path="res://states/barrel/bounce_state.gd" id="3_654nl"]
+[ext_resource type="Script" path="res://states/barrel/roll_state.gd" id="3_kanbc"]
+[ext_resource type="Script" path="res://states/barrel/fall_state.gd" id="4_5umik"]
+[ext_resource type="Script" path="res://states/barrel/tumble_state.gd" id="6_1d25j"]
 
 [sub_resource type="GDScript" id="GDScript_74ut7"]
 script/source = "extends CharacterBody2D
 
 const SPEED = 175.0
-const FALLING_DELTA_X = 1500.0
-
-enum State { FREEFALL, BOUNCE, ROLL, TUMBLE }
 
 @export var direction = 1
-@export var state = State.ROLL
-@export var tumble_chance = 25
-
-var gravity = ProjectSettings.get_setting(\"physics/2d/default_gravity\")
-var over_ladder = false
+@export var tumble_chance: float = 0.3
 
 @onready var anim_tree = $AnimationTree
+@onready var state_machine = $StateMachine
+@onready var bounce_state = $StateMachine/BounceState as BounceState
+@onready var fall_state = $StateMachine/FallState as FallState
+@onready var roll_state = $StateMachine/RollState as RollState
+@onready var tumble_state = $StateMachine/TumbleState as TumbleState
 
 func _ready():
+	bounce_state.finished_bounce.connect(self.finished_bounce)
+	fall_state.fell_to_floor.connect(self.fell_to_floor)
+	roll_state.rolled_off_platform.connect(self.rolled_off_platform)
+	roll_state.rolled_over_ladder_top.connect(self.rolled_over_ladder_top)
+	tumble_state.tumbled_to_bottom_of_ladder.connect(self.tumbled_to_bottom_of_ladder)
+	
 	velocity = Vector2(SPEED * direction, 5)
 
-func _physics_process(delta):
-	match state:
-		State.FREEFALL:
-			freefall_physics(delta)
-		State.BOUNCE:
-			bounce_physics(delta)
-		State.ROLL:
-			roll_physics(delta)
-		State.TUMBLE:
-			tumble_physics(delta)
-	
+func _physics_process(_delta):
 	anim_tree.set(\"parameters/StateMachine/Rolling/blend_position\", velocity.x)
 	anim_tree.set(\"parameters/TimeScale/scale\", velocity.length() / SPEED)
-	
-	move_and_slide()
 
-func freefall_physics(delta):
-	velocity.x = move_toward(velocity.x, SPEED * direction * 0.3, FALLING_DELTA_X * delta)
-	velocity.y += gravity * delta
+func finished_bounce():
+	state_machine.change_state(roll_state)
 	
-	if is_on_floor():
-		velocity = Vector2(0, -150)
-		direction *= -1
-		state = State.BOUNCE
-			
-func bounce_physics(delta):
-	velocity.x = direction * 0.6 * SPEED
-	velocity.y += gravity * delta
-	
-	if is_on_floor():
-		state = State.ROLL
+func fell_to_floor():
+	state_machine.change_state(bounce_state)
 
-func roll_physics(delta):
-	velocity.x = move_toward(velocity.x, SPEED * direction, FALLING_DELTA_X * delta)
-	velocity.y += gravity * delta
-	
-	if is_freefalling():
-		state = State.FREEFALL
-		return
-		
-	if ($LadderTopChecker.is_colliding() and
-		not over_ladder and
-		randi_range(0, 99) < tumble_chance
-	):
-		self.set_collision_mask_value(2, false)
-		
-		move_to_centre_of_ladder()
-		velocity = Vector2.ZERO
+func rolled_off_platform():
+	state_machine.change_state(fall_state)
 
-		state = State.TUMBLE
-		return
-		
-	over_ladder = $LadderTopChecker.is_colliding()
+func rolled_over_ladder_top(checker):
+	if randf_range(0.0, 1.0) <= tumble_chance:
+		move_to_centre_of_ladder(checker)
+		state_machine.change_state(tumble_state)
 
-func tumble_physics(delta):
-	velocity.x = 0
-	velocity.y = SPEED
-	
-	if $PlatformBelowChecker.is_colliding() and $LadderBottomChecker.is_colliding():
-		self.set_collision_mask_value(2, true)
-		direction *= -1
-		velocity = Vector2(direction * SPEED, 0)
-		state = State.ROLL
-		return
+func tumbled_to_bottom_of_ladder():
+	state_machine.change_state(roll_state)
 
-func is_freefalling():
-	for detector in get_tree().get_nodes_in_group(\"BarrelPlatformDetectors\") as Array[RayCast2D]:
-		if detector.is_colliding():
-			return false
-	
-	return true
-	
-func move_to_centre_of_ladder():
-	var tile_map : TileMap = $LadderTopChecker.get_collider()
-	var rid = $LadderTopChecker.get_collider_rid()
+func move_to_centre_of_ladder(checker):
+	var tile_map : TileMap = checker.get_collider()
+	var rid = checker.get_collider_rid()
 	var tile_coord = tile_map.get_coords_for_body_rid(rid)
 	position.x = (tile_coord.x + 0.5) * tile_map.tile_set.tile_size.x + tile_map.position.x
 "
@@ -199,11 +157,11 @@ advance_mode = 2
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_u0ewe"]
 advance_mode = 2
-advance_expression = "state == State.TUMBLE"
+advance_expression = "state_machine.state == tumble_state"
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_mooyk"]
 advance_mode = 2
-advance_expression = "state != State.TUMBLE"
+advance_expression = "state_machine.state != tumble_state"
 
 [sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_c6shn"]
 states/Rolling/node = SubResource("AnimationNodeBlendSpace1D_iy5fh")
@@ -216,7 +174,7 @@ graph_offset = Vector2(138.983, -1.95749)
 [sub_resource type="AnimationNodeTimeScale" id="AnimationNodeTimeScale_wyhcj"]
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_sane2"]
-graph_offset = Vector2(-186.24, 105.6)
+graph_offset = Vector2(-306.24, 59.52)
 nodes/StateMachine/node = SubResource("AnimationNodeStateMachine_c6shn")
 nodes/StateMachine/position = Vector2(-90, 130)
 nodes/TimeScale/node = SubResource("AnimationNodeTimeScale_wyhcj")
@@ -273,3 +231,25 @@ collision_mask = 4
 position = Vector2(2.08165e-12, 15)
 target_position = Vector2(2.08165e-12, 3)
 collision_mask = 2
+
+[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("actor", "anim_tree", "initial_state")]
+script = ExtResource("2_27a6e")
+actor = NodePath("..")
+anim_tree = NodePath("../AnimationTree")
+initial_state = NodePath("RollState")
+
+[node name="BounceState" type="Node" parent="StateMachine"]
+script = ExtResource("3_654nl")
+
+[node name="FallState" type="Node" parent="StateMachine"]
+script = ExtResource("4_5umik")
+
+[node name="RollState" type="Node" parent="StateMachine" node_paths=PackedStringArray("ladder_top_checker")]
+script = ExtResource("3_kanbc")
+platform_checkers_group_name = "BarrelPlatformDetectors"
+ladder_top_checker = NodePath("../../LadderTopChecker")
+
+[node name="TumbleState" type="Node" parent="StateMachine" node_paths=PackedStringArray("ladder_bottom_checker", "platform_below_checker")]
+script = ExtResource("6_1d25j")
+ladder_bottom_checker = NodePath("../../LadderBottomChecker")
+platform_below_checker = NodePath("../../PlatformBelowChecker")
