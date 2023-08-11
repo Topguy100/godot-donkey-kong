@@ -15,6 +15,10 @@ func on_enter():
 	super.on_enter()
 	actor.velocity = Vector2(actor.direction * actor.SPEED, 0)
 
+func _process(delta):
+	anim_tree.set("parameters/StateMachine/Rolling/blend_position", actor.velocity.x)
+	anim_tree.set("parameters/TimeScale/scale", actor.velocity.x / actor.SPEED)
+
 func _physics_process(delta):
 	actor.velocity.x = move_toward(actor.velocity.x, actor.SPEED * actor.direction, ACCEL_X * delta)
 	actor.velocity.y += gravity * delta

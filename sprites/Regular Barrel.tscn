@@ -32,10 +32,6 @@ func _ready():
 	tumble_state.tumbled_to_bottom_of_ladder.connect(self.state_machine.change_state.bind(roll_state))
 	
 	velocity = Vector2(SPEED * direction, 5)
-
-func _physics_process(_delta):
-	anim_tree.set(\"parameters/StateMachine/Rolling/blend_position\", velocity.x)
-	anim_tree.set(\"parameters/TimeScale/scale\", velocity.length() / SPEED)
 	
 func rolled_over_ladder_top(checker):
 	if randf_range(0.0, 1.0) <= tumble_chance:
