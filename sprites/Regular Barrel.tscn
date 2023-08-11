@@ -12,10 +12,15 @@
 script/source = "extends CharacterBody2D
 
 const SPEED = 175.0
+enum BarrelType { REGULAR = 0, EXPLOSIVE }
 
-@export var direction = 1
-@export var tumble_chance: float = 0.3
+@export var direction := 1
+@export var explosive_chance := 0.1
+@export var tumble_chance := 0.3
 
+var barrel_type: BarrelType
+
+@onready var sprites = $Sprite2D
 @onready var anim_tree = $AnimationTree
 @onready var state_machine = $StateMachine
 @onready var bounce_state = $StateMachine/BounceState as BounceState
@@ -24,7 +29,15 @@ const SPEED = 175.0
 @onready var roll_state = $StateMachine/RollState as RollState
 @onready var tumble_state = $StateMachine/TumbleState as TumbleState
 
+func _init():
+	barrel_type = BarrelType.REGULAR if randf() > explosive_chance else BarrelType.EXPLOSIVE
+
 func _ready():
+	var texture_name = BarrelType.keys()[barrel_type].to_camel_case()
+	sprites.texture = load(\"res://assets/objects/\" + texture_name + \" Barrel.png\")
+	
+	anim_tree.active = true
+	
 	bounce_state.finished_bounce.connect(self.state_machine.change_state.bind(roll_state))
 	fall_state.fell_to_floor.connect(self.state_machine.change_state.bind(bounce_state))
 	roll_state.rolled_off_platform.connect(self.state_machine.change_state.bind(fall_state))
@@ -34,7 +47,7 @@ func _ready():
 	velocity = Vector2(SPEED * direction, 5)
 	
 func rolled_over_ladder_top(checker):
-	if randf_range(0.0, 1.0) <= tumble_chance:
+	if randf() <= tumble_chance:
 		move_to_centre_of_ladder(checker)
 		state_machine.change_state(tumble_state)
 
@@ -189,7 +202,6 @@ libraries = {
 tree_root = SubResource("AnimationNodeBlendTree_sane2")
 anim_player = NodePath("../AnimationPlayer")
 advance_expression_base_node = NodePath("..")
-active = true
 parameters/StateMachine/Rolling/blend_position = 2.08165e-12
 parameters/TimeScale/scale = 1.0
 
