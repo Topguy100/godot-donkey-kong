@@ -1,10 +1,11 @@
-[gd_scene load_steps=24 format=3 uid="uid://u87pjoxlflps"]
+[gd_scene load_steps=25 format=3 uid="uid://u87pjoxlflps"]
 
 [ext_resource type="Texture2D" uid="uid://c60kvbne1okf7" path="res://assets/objects/Regular Barrel.png" id="1_814dc"]
 [ext_resource type="Script" path="res://states/state_machine.gd" id="2_27a6e"]
 [ext_resource type="Script" path="res://states/barrel/bounce_state.gd" id="3_654nl"]
 [ext_resource type="Script" path="res://states/barrel/roll_state.gd" id="3_kanbc"]
 [ext_resource type="Script" path="res://states/barrel/fall_state.gd" id="4_5umik"]
+[ext_resource type="Script" path="res://states/barrel/freeze_state.gd" id="5_h5cu4"]
 [ext_resource type="Script" path="res://states/barrel/tumble_state.gd" id="6_1d25j"]
 
 [sub_resource type="GDScript" id="GDScript_74ut7"]
@@ -19,6 +20,7 @@ const SPEED = 175.0
 @onready var state_machine = $StateMachine
 @onready var bounce_state = $StateMachine/BounceState as BounceState
 @onready var fall_state = $StateMachine/FallState as FallState
+@onready var freeze_state = $StateMachine/FreezeState
 @onready var roll_state = $StateMachine/RollState as RollState
 @onready var tumble_state = $StateMachine/TumbleState as TumbleState
 
@@ -169,7 +171,7 @@ states/Rolling/position = Vector2(370.94, 100.622)
 states/Tumbling/node = SubResource("AnimationNodeAnimation_iae1c")
 states/Tumbling/position = Vector2(570.483, 100.311)
 transitions = ["Start", "Rolling", SubResource("AnimationNodeStateMachineTransition_w7lih"), "Rolling", "Tumbling", SubResource("AnimationNodeStateMachineTransition_u0ewe"), "Tumbling", "Rolling", SubResource("AnimationNodeStateMachineTransition_mooyk")]
-graph_offset = Vector2(138.983, -1.95749)
+graph_offset = Vector2(0.472694, -56.4525)
 
 [sub_resource type="AnimationNodeTimeScale" id="AnimationNodeTimeScale_wyhcj"]
 
@@ -243,6 +245,9 @@ script = ExtResource("3_654nl")
 
 [node name="FallState" type="Node" parent="StateMachine"]
 script = ExtResource("4_5umik")
+
+[node name="FreezeState" type="Node" parent="StateMachine"]
+script = ExtResource("5_h5cu4")
 
 [node name="RollState" type="Node" parent="StateMachine" node_paths=PackedStringArray("ladder_top_checker")]
 script = ExtResource("3_kanbc")
