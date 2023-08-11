@@ -16,8 +16,14 @@ script/source = "extends TileMap
 
 @export var lives := 3
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
+var prev_lives: int
+
 func _process(_delta):
+	if lives == prev_lives:
+		return
+	
+	prev_lives = lives
+	
 	self.clear_layer(0)
 	
 	for cell_x in range(self.lives):

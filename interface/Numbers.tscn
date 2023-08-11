@@ -59,8 +59,19 @@ enum Colour { WHITE = 0, BLUE, CYAN, YELLOW }
 @export var colour := Colour.WHITE
 @export var number := 0
 
+var prev_digits: int
+var prev_colour: Colour
+var prev_number: int
+
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta):
+	if digits == prev_digits and colour == prev_colour and number == prev_number:
+		return
+
+	prev_digits = digits
+	prev_colour = colour
+	prev_number = number
+	
 	self.clear_layer(0)
 	
 	for cell_x in range(self.digits):
