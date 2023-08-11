@@ -1,10 +1,14 @@
-[gd_scene load_steps=12 format=3 uid="uid://chadcflauv6ap"]
+[gd_scene load_steps=44 format=3 uid="uid://chadcflauv6ap"]
 
 [ext_resource type="Texture2D" uid="uid://idelqjnu7633" path="res://assets/characters/Mario.png" id="1_27e4p"]
+[ext_resource type="Script" path="res://states/state_machine.gd" id="2_h01ru"]
+[ext_resource type="Script" path="res://states/player/climb_state.gd" id="3_8qeu3"]
+[ext_resource type="Script" path="res://states/player/idle_state.gd" id="3_ygm7w"]
+[ext_resource type="Script" path="res://states/player/jump_state.gd" id="4_e73df"]
+[ext_resource type="Script" path="res://states/player/run_state.gd" id="4_hvfdt"]
 
 [sub_resource type="GDScript" id="GDScript_sy84s"]
 script/source = "extends CharacterBody2D
-
 
 const SPEED = 150.0
 const JUMP_VELOCITY = -290.0
@@ -331,6 +335,105 @@ _data = {
 "running": SubResource("Animation_phuvu")
 }
 
+[sub_resource type="AnimationNodeBlendSpace1D" id="AnimationNodeBlendSpace1D_3s7lq"]
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_u8wuy"]
+animation = &"death"
+
+[sub_resource type="AnimationNodeBlendSpace1D" id="AnimationNodeBlendSpace1D_0e7vx"]
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_w83nf"]
+animation = &"ladder_end"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_e3nub"]
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_d4gfb"]
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_6oep1"]
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_pivhf"]
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_r70dy"]
+states/End/position = Vector2(554, 100.25)
+"states/Jump End/node" = SubResource("AnimationNodeBlendSpace1D_0e7vx")
+"states/Jump End/position" = Vector2(370.901, 1.96011)
+"states/Ladder End/node" = SubResource("AnimationNodeAnimation_w83nf")
+"states/Ladder End/position" = Vector2(370.59, 197.48)
+transitions = ["Start", "Ladder End", SubResource("AnimationNodeStateMachineTransition_e3nub"), "Ladder End", "End", SubResource("AnimationNodeStateMachineTransition_d4gfb"), "Start", "Jump End", SubResource("AnimationNodeStateMachineTransition_6oep1"), "Jump End", "End", SubResource("AnimationNodeStateMachineTransition_pivhf")]
+graph_offset = Vector2(19.7123, -305.04)
+
+[sub_resource type="AnimationNodeBlendSpace1D" id="AnimationNodeBlendSpace1D_lsf5j"]
+
+[sub_resource type="AnimationNodeBlendSpace1D" id="AnimationNodeBlendSpace1D_dkqrm"]
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_5due8"]
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_vhu28"]
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_sjc5e"]
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_28yn8"]
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_sa7g2"]
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_21e3d"]
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_3vgoc"]
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_nnu24"]
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_fuk7v"]
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_dnuc8"]
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_44dou"]
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_wtg3n"]
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_jjpq2"]
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_y1hxu"]
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_fb5go"]
+states/Climb/node = SubResource("AnimationNodeBlendSpace1D_3s7lq")
+states/Climb/position = Vector2(448.237, -46.4588)
+states/Death/node = SubResource("AnimationNodeAnimation_u8wuy")
+states/Death/position = Vector2(786.358, -45.1646)
+states/End/position = Vector2(948.5, -46.5472)
+states/Idle/node = SubResource("AnimationNodeStateMachine_r70dy")
+states/Idle/position = Vector2(333.012, 101.296)
+states/Jump/node = SubResource("AnimationNodeBlendSpace1D_lsf5j")
+states/Jump/position = Vector2(601.911, 251.549)
+states/Run/node = SubResource("AnimationNodeBlendSpace1D_dkqrm")
+states/Run/position = Vector2(600.859, 98.9642)
+states/Start/position = Vector2(200, 101.638)
+transitions = ["Run", "Jump", SubResource("AnimationNodeStateMachineTransition_5due8"), "Idle", "Run", SubResource("AnimationNodeStateMachineTransition_vhu28"), "Idle", "Jump", SubResource("AnimationNodeStateMachineTransition_sjc5e"), "Jump", "Idle", SubResource("AnimationNodeStateMachineTransition_28yn8"), "Run", "Idle", SubResource("AnimationNodeStateMachineTransition_sa7g2"), "Run", "Climb", SubResource("AnimationNodeStateMachineTransition_21e3d"), "Climb", "Idle", SubResource("AnimationNodeStateMachineTransition_3vgoc"), "Idle", "Climb", SubResource("AnimationNodeStateMachineTransition_nnu24"), "Start", "Idle", SubResource("AnimationNodeStateMachineTransition_fuk7v"), "Climb", "Death", SubResource("AnimationNodeStateMachineTransition_dnuc8"), "Idle", "Death", SubResource("AnimationNodeStateMachineTransition_44dou"), "Run", "Death", SubResource("AnimationNodeStateMachineTransition_wtg3n"), "Jump", "Death", SubResource("AnimationNodeStateMachineTransition_jjpq2"), "Death", "End", SubResource("AnimationNodeStateMachineTransition_y1hxu")]
+graph_offset = Vector2(67.2194, -281.22)
+
+[sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_vnk0a"]
+graph_offset = Vector2(-126.462, -188.5)
+nodes/StateMachine/node = SubResource("AnimationNodeStateMachine_fb5go")
+nodes/StateMachine/position = Vector2(100, 120)
+node_connections = [&"output", 0, &"StateMachine"]
+
 [node name="Player" type="CharacterBody2D"]
 collision_mask = 2
 script = SubResource("GDScript_sy84s")
@@ -364,7 +467,33 @@ libraries = {
 "": SubResource("AnimationLibrary_met8n")
 }
 
+[node name="AnimationTree" type="AnimationTree" parent="."]
+tree_root = SubResource("AnimationNodeBlendTree_vnk0a")
+anim_player = NodePath("../AnimationPlayer")
+parameters/StateMachine/Climb/blend_position = 0
+"parameters/StateMachine/Idle/Jump End/blend_position" = 0
+parameters/StateMachine/Jump/blend_position = 0
+parameters/StateMachine/Run/blend_position = 0
+
 [node name="LandingTimer" type="Timer" parent="."]
 wait_time = 0.15
+
+[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("actor", "anim_tree", "initial_state")]
+script = ExtResource("2_h01ru")
+actor = NodePath("..")
+anim_tree = NodePath("../AnimationTree")
+initial_state = NodePath("IdleState")
+
+[node name="ClimbState" type="Node" parent="StateMachine"]
+script = ExtResource("3_8qeu3")
+
+[node name="IdleState" type="Node" parent="StateMachine"]
+script = ExtResource("3_ygm7w")
+
+[node name="JumpState" type="Node" parent="StateMachine"]
+script = ExtResource("4_e73df")
+
+[node name="RunState" type="Node" parent="StateMachine"]
+script = ExtResource("4_hvfdt")
 
 [connection signal="timeout" from="LandingTimer" to="." method="_on_landing_timer_timeout"]
