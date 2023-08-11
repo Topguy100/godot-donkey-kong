@@ -25,34 +25,22 @@ const SPEED = 175.0
 @onready var tumble_state = $StateMachine/TumbleState as TumbleState
 
 func _ready():
-	bounce_state.finished_bounce.connect(self.finished_bounce)
-	fall_state.fell_to_floor.connect(self.fell_to_floor)
-	roll_state.rolled_off_platform.connect(self.rolled_off_platform)
+	bounce_state.finished_bounce.connect(self.state_machine.change_state.bind(roll_state))
+	fall_state.fell_to_floor.connect(self.state_machine.change_state.bind(bounce_state))
+	roll_state.rolled_off_platform.connect(self.state_machine.change_state.bind(fall_state))
 	roll_state.rolled_over_ladder_top.connect(self.rolled_over_ladder_top)
-	tumble_state.tumbled_to_bottom_of_ladder.connect(self.tumbled_to_bottom_of_ladder)
+	tumble_state.tumbled_to_bottom_of_ladder.connect(self.state_machine.change_state.bind(roll_state))
 	
 	velocity = Vector2(SPEED * direction, 5)
 
 func _physics_process(_delta):
 	anim_tree.set(\"parameters/StateMachine/Rolling/blend_position\", velocity.x)
 	anim_tree.set(\"parameters/TimeScale/scale\", velocity.length() / SPEED)
-
-func finished_bounce():
-	state_machine.change_state(roll_state)
 	
-func fell_to_floor():
-	state_machine.change_state(bounce_state)
-
-func rolled_off_platform():
-	state_machine.change_state(fall_state)
-
 func rolled_over_ladder_top(checker):
 	if randf_range(0.0, 1.0) <= tumble_chance:
 		move_to_centre_of_ladder(checker)
 		state_machine.change_state(tumble_state)
-
-func tumbled_to_bottom_of_ladder():
-	state_machine.change_state(roll_state)
 
 func move_to_centre_of_ladder(checker):
 	var tile_map : TileMap = checker.get_collider()
