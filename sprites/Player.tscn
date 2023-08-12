@@ -460,6 +460,7 @@ blend_point_0/node = SubResource("AnimationNodeAnimation_b8js7")
 blend_point_0/pos = -1.0
 blend_point_1/node = SubResource("AnimationNodeAnimation_kail2")
 blend_point_1/pos = 1.0
+blend_mode = 1
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_quqs8"]
 animation = &"climb_end"
@@ -488,6 +489,7 @@ blend_point_0/node = SubResource("AnimationNodeAnimation_6tt4q")
 blend_point_0/pos = -1.0
 blend_point_1/node = SubResource("AnimationNodeAnimation_83l4m")
 blend_point_1/pos = 1.0
+blend_mode = 1
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_0ouo6"]
 animation = &"run_left"
@@ -513,6 +515,7 @@ blend_point_0/node = SubResource("AnimationNodeAnimation_qvq5k")
 blend_point_0/pos = -1.0
 blend_point_1/node = SubResource("AnimationNodeAnimation_q8t2r")
 blend_point_1/pos = 1.0
+blend_mode = 1
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_1g3ei"]
 advance_mode = 2
@@ -604,7 +607,6 @@ shape = SubResource("CapsuleShape2D_xsfub")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("1_27e4p")
-flip_h = true
 hframes = 18
 frame = 13
 
