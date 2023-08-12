@@ -21,7 +21,7 @@ func _ready():
 		self.change_state(self.initial_state)
 
 func change_state(new_state: State):
-	if new_state not in self.states:
+	if new_state == self.state:
 		return
 
 	if self.state:

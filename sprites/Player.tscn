@@ -1,4 +1,4 @@
-[gd_scene load_steps=44 format=3 uid="uid://chadcflauv6ap"]
+[gd_scene load_steps=58 format=3 uid="uid://chadcflauv6ap"]
 
 [ext_resource type="Texture2D" uid="uid://idelqjnu7633" path="res://assets/characters/Mario.png" id="1_27e4p"]
 [ext_resource type="Script" path="res://states/state_machine.gd" id="2_h01ru"]
@@ -10,186 +10,178 @@
 [sub_resource type="GDScript" id="GDScript_sy84s"]
 script/source = "extends CharacterBody2D
 
-const SPEED = 150.0
+const SPEED = 130.0
 const JUMP_VELOCITY = -290.0
 
-enum State { AIR, FLOOR, LADDER }
-var state = State.AIR
+@onready var ladder_bottom_checker = $LadderBottomChecker as RayCast2D
+@onready var ladder_top_checker = $LadderTopChecker as RayCast2D
 
-var skid_landing = false
+@onready var state_machine = $StateMachine as StateMachine
+@onready var climb_state = $StateMachine/ClimbState as ClimbState
+@onready var idle_state = $StateMachine/IdleState as IdleState
+@onready var jump_state = $StateMachine/JumpState as JumpState
+@onready var run_state = $StateMachine/RunState as RunState
 
-# Get the gravity from the project settings to be synced with RigidBody nodes.
-var gravity = ProjectSettings.get_setting(\"physics/2d/default_gravity\")
+func _ready():
+	climb_state.input_pressed.connect(input_pressed)
+	idle_state.input_pressed.connect(input_pressed)
+	jump_state.landed.connect(state_machine.change_state.bind(idle_state))
+	run_state.input_pressed.connect(input_pressed)
+	run_state.finished_running.connect(state_machine.change_state.bind(idle_state))
 
-func _physics_process(delta):
-	match state:
-		State.AIR:
-			air_physics(delta)
-		State.FLOOR:
-			floor_physics(delta)
-		State.LADDER:
-			ladder_physics(delta)
-
-	move_and_slide()
-
-func air_physics(delta):
-	$LandingTimer.stop()
-	
-	$AnimationPlayer.play(\"jump\")
-	
-	# Only update the y velocity during a jump - no direction changes
-	velocity.y += gravity * delta
-	
-	# Return to the floor after a jump
-	if is_on_floor():
-		if velocity.x != 0:
-			skid_landing = true
-			$AnimationPlayer.play(\"jump_end\")
-			$LandingTimer.start()
-		else:
-			$AnimationPlayer.play(\"running\")
-		
-		state = State.FLOOR
-		return
-	
-func floor_physics(delta):
-	# Move to AIR when pressing the jump key
+func input_pressed():
+	# Check for attempts to jump
 	if Input.is_action_just_pressed(\"ui_accept\"):
-		velocity.y = JUMP_VELOCITY
-		state = State.AIR
+		state_machine.change_state(jump_state)
 		return
-
-	# Get inputs
+	
+	# Check for attempts to run
 	var x_axis = Input.get_axis(\"ui_left\", \"ui_right\")
+	if x_axis:
+		state_machine.change_state(run_state)
+		return
+	
+	# Check for attempts to climb
 	var y_axis = Input.get_axis(\"ui_up\", \"ui_down\")
-
-	# Do checks for switching to LADDER state
-	if y_axis == -1 and not x_axis and $LadderBottomChecker.is_colliding():
-		switch_to_ladder_state($LadderBottomChecker)
+	if y_axis == -1 and ladder_bottom_checker.is_colliding():
+		move_to_centre_of_ladder(ladder_bottom_checker)
+		state_machine.change_state(climb_state)
 		return
-	
-	if y_axis == 1 and not x_axis and $LadderTopChecker.is_colliding():
-		switch_to_ladder_state($LadderTopChecker)
-		return
-	
-	# Ensure Mario is facing the correct direction
-	if x_axis == 1:
-		$Sprite2D.flip_h = true
-	elif x_axis == -1:
-		$Sprite2D.flip_h = false
-	
-	if not skid_landing:
-		$AnimationPlayer.play(\"running\")
-		
-		if not x_axis:
-			$AnimationPlayer.stop()
-		
-	velocity.x = x_axis * SPEED
-	velocity.y += gravity * delta
-
-func ladder_physics(_delta):
-	var at_end_of_ladder = (
-		$PlatformBelowChecker.is_colliding() and
-		($LadderBottomChecker.is_colliding() or $LadderTopChecker.is_colliding())
-	)
-	
-	# Get the state of the up and down keys
-	var y_axis = Input.get_axis(\"ui_up\", \"ui_down\")
-	if ((y_axis == -1 and not $LadderTopChecker.is_colliding()) or
-		(y_axis == 1 and not $LadderBottomChecker.is_colliding())
-	):
-		velocity.y = y_axis * SPEED
-		$AnimationPlayer.play(\"climbing\")
-	else:
-		velocity.y = 0
-		
-		if at_end_of_ladder:
-			$AnimationPlayer.play(\"ladder_end\")
-		else:
-			$AnimationPlayer.pause()
-	
-	# Transition to AIR from end of ladder
-	if Input.is_action_just_pressed(\"ui_accept\") and at_end_of_ladder:
-		self.set_collision_mask_value(2, true)
-		velocity.y = JUMP_VELOCITY
-		state = State.AIR
-		return
-		
-	# Do checks for switching to FLOOR state 
-	var x_axis = Input.get_axis(\"ui_left\", \"ui_right\")
-	if x_axis and at_end_of_ladder:
-		# Restart checking for platform collisions while on the floor
-		self.set_collision_mask_value(2, true)
-		state = State.FLOOR
+	elif y_axis == 1 and ladder_top_checker.is_colliding():
+		move_to_centre_of_ladder(ladder_top_checker)
+		state_machine.change_state(climb_state)
 		return
 
-func switch_to_ladder_state(checker):
-	# Stop checking for platform collisions while on ladders
-	self.set_collision_mask_value(2, false)
-	
-	# Prevent sideways movement and snap to the centre of the ladder
-	velocity.x = 0
-	move_to_centre_of_ladder(checker)
-
-	state = State.LADDER
-
-# Moves Mario to line up with the ladder perfectly before ascent or descent
+# Moves Mario to line up with the ladder perfectly
 func move_to_centre_of_ladder(checker: RayCast2D):
 	var tile_map : TileMap = checker.get_collider()
 	var rid = checker.get_collider_rid()
 	var tile_coord = tile_map.get_coords_for_body_rid(rid)
 	position.x = (tile_coord.x + 0.5) * tile_map.tile_set.tile_size.x + tile_map.position.x
-
-
-func _on_landing_timer_timeout():
-	skid_landing = false
 "
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_xsfub"]
 radius = 15.0
 height = 48.0
 
-[sub_resource type="Animation" id="Animation_jltwj"]
-length = 0.001
+[sub_resource type="Animation" id="Animation_o1jx5"]
+resource_name = "idle_right"
+length = 0.1
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath(".:flip_h")
+tracks/0/path = NodePath(".:frame")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 1,
-"values": [false]
+"values": [0]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
 tracks/1/enabled = true
-tracks/1/path = NodePath(".:frame")
+tracks/1/path = NodePath(".:flip_h")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 1,
+"values": [true]
+}
+
+[sub_resource type="Animation" id="Animation_fuxan"]
+resource_name = "idle_left"
+length = 0.1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
 "values": [0]
 }
-tracks/2/type = "value"
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/path = NodePath(".:flip_v")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/keys = {
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:flip_h")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 1,
 "values": [false]
 }
 
+[sub_resource type="Animation" id="Animation_phuvu"]
+resource_name = "run_left"
+length = 0.18
+loop_mode = 1
+step = 0.06
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.06, 0.12),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [0, 1, 2]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:flip_h")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [false]
+}
+
+[sub_resource type="Animation" id="Animation_17hnu"]
+resource_name = "run_right"
+length = 0.18
+loop_mode = 1
+step = 0.06
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.06, 0.12),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [0, 1, 2]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:flip_h")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [true]
+}
+
 [sub_resource type="Animation" id="Animation_bmmu7"]
-resource_name = "climbing"
+resource_name = "climb"
 length = 0.3
 loop_mode = 1
 tracks/0/type = "value"
@@ -217,8 +209,24 @@ tracks/1/keys = {
 "values": [false, true]
 }
 
+[sub_resource type="Animation" id="Animation_kcmuu"]
+resource_name = "climb_end"
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [6]
+}
+
 [sub_resource type="Animation" id="Animation_bl034"]
-resource_name = "death"
+resource_name = "death_right"
 length = 1.5
 step = 0.15
 tracks/0/type = "value"
@@ -258,8 +266,105 @@ tracks/2/keys = {
 "values": [false, true, false, true, false]
 }
 
+[sub_resource type="Animation" id="Animation_uk7bh"]
+resource_name = "death_left"
+length = 1.5
+step = 0.15
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.15, 0.3, 0.45, 0.6, 0.75, 0.9, 1.05, 1.2, 1.35),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [15, 16, 15, 16, 15, 16, 15, 16, 15, 17]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:flip_h")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.3, 0.6, 0.9, 1.2),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 1,
+"values": [true, false, true, false, true]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath(".:flip_v")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.3, 0.6, 0.9, 1.2),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 1,
+"values": [false, true, false, true, false]
+}
+
+[sub_resource type="Animation" id="Animation_a0ton"]
+resource_name = "jump_end_left"
+length = 0.15
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [14]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:flip_h")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [false]
+}
+
+[sub_resource type="Animation" id="Animation_24x35"]
+resource_name = "jump_end_right"
+length = 0.15
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [14]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:flip_h")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [true]
+}
+
 [sub_resource type="Animation" id="Animation_fd5f4"]
-resource_name = "jump"
+resource_name = "jump_right"
 length = 0.001
 tracks/0/type = "value"
 tracks/0/imported = false
@@ -273,9 +378,21 @@ tracks/0/keys = {
 "update": 1,
 "values": [13]
 }
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:flip_h")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [true]
+}
 
-[sub_resource type="Animation" id="Animation_24x35"]
-resource_name = "jump_end"
+[sub_resource type="Animation" id="Animation_3e5dm"]
+resource_name = "jump_left"
 length = 0.001
 tracks/0/type = "value"
 tracks/0/imported = false
@@ -287,152 +404,196 @@ tracks/0/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 1,
-"values": [14]
+"values": [13]
 }
-
-[sub_resource type="Animation" id="Animation_kcmuu"]
-resource_name = "ladder_end"
-length = 0.001
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath(".:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:flip_h")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 1,
-"values": [6]
-}
-
-[sub_resource type="Animation" id="Animation_phuvu"]
-resource_name = "running"
-length = 0.18
-loop_mode = 1
-step = 0.06
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath(".:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.06, 0.12),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 1,
-"values": [0, 1, 2]
+"values": [false]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_met8n"]
 _data = {
-"RESET": SubResource("Animation_jltwj"),
-"climbing": SubResource("Animation_bmmu7"),
-"death": SubResource("Animation_bl034"),
-"jump": SubResource("Animation_fd5f4"),
-"jump_end": SubResource("Animation_24x35"),
-"ladder_end": SubResource("Animation_kcmuu"),
-"running": SubResource("Animation_phuvu")
+"climb": SubResource("Animation_bmmu7"),
+"climb_end": SubResource("Animation_kcmuu"),
+"death_left": SubResource("Animation_uk7bh"),
+"death_right": SubResource("Animation_bl034"),
+"idle_left": SubResource("Animation_fuxan"),
+"idle_right": SubResource("Animation_o1jx5"),
+"jump_end_left": SubResource("Animation_a0ton"),
+"jump_end_right": SubResource("Animation_24x35"),
+"jump_left": SubResource("Animation_3e5dm"),
+"jump_right": SubResource("Animation_fd5f4"),
+"run_left": SubResource("Animation_phuvu"),
+"run_right": SubResource("Animation_17hnu")
 }
 
-[sub_resource type="AnimationNodeBlendSpace1D" id="AnimationNodeBlendSpace1D_3s7lq"]
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_0yckh"]
+animation = &"climb"
 
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_u8wuy"]
-animation = &"death"
+[sub_resource type="AnimationNodeTimeScale" id="AnimationNodeTimeScale_chu1y"]
 
-[sub_resource type="AnimationNodeBlendSpace1D" id="AnimationNodeBlendSpace1D_0e7vx"]
+[sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_i3ifg"]
+graph_offset = Vector2(-639.36, -175.68)
+nodes/Animation/node = SubResource("AnimationNodeAnimation_0yckh")
+nodes/Animation/position = Vector2(40, 100)
+nodes/TimeScale/node = SubResource("AnimationNodeTimeScale_chu1y")
+nodes/TimeScale/position = Vector2(230, 120)
+nodes/output/position = Vector2(430, 150)
+node_connections = [&"output", 0, &"TimeScale", &"TimeScale", 0, &"Animation"]
 
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_w83nf"]
-animation = &"ladder_end"
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_b8js7"]
+animation = &"death_left"
 
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_e3nub"]
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_kail2"]
+animation = &"death_right"
+
+[sub_resource type="AnimationNodeBlendSpace1D" id="AnimationNodeBlendSpace1D_hhjyo"]
+blend_point_0/node = SubResource("AnimationNodeAnimation_b8js7")
+blend_point_0/pos = -1.0
+blend_point_1/node = SubResource("AnimationNodeAnimation_kail2")
+blend_point_1/pos = 1.0
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_quqs8"]
+animation = &"climb_end"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_b3rn0"]
+animation = &"idle_left"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_8t1vk"]
+animation = &"idle_right"
+
+[sub_resource type="AnimationNodeBlendSpace1D" id="AnimationNodeBlendSpace1D_sektc"]
+blend_point_0/node = SubResource("AnimationNodeAnimation_b3rn0")
+blend_point_0/pos = -1.0
+blend_point_1/node = SubResource("AnimationNodeAnimation_8t1vk")
+blend_point_1/pos = 1.0
+blend_mode = 1
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_6tt4q"]
+animation = &"jump_left"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_83l4m"]
+animation = &"jump_right"
+
+[sub_resource type="AnimationNodeBlendSpace1D" id="AnimationNodeBlendSpace1D_e8bpj"]
+blend_point_0/node = SubResource("AnimationNodeAnimation_6tt4q")
+blend_point_0/pos = -1.0
+blend_point_1/node = SubResource("AnimationNodeAnimation_83l4m")
+blend_point_1/pos = 1.0
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_0ouo6"]
+animation = &"run_left"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_wnhr1"]
+animation = &"run_right"
+
+[sub_resource type="AnimationNodeBlendSpace1D" id="AnimationNodeBlendSpace1D_qmnkl"]
+blend_point_0/node = SubResource("AnimationNodeAnimation_0ouo6")
+blend_point_0/pos = -1.0
+blend_point_1/node = SubResource("AnimationNodeAnimation_wnhr1")
+blend_point_1/pos = 1.0
+blend_mode = 1
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_qvq5k"]
+animation = &"jump_end_left"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_q8t2r"]
+animation = &"jump_end_right"
+
+[sub_resource type="AnimationNodeBlendSpace1D" id="AnimationNodeBlendSpace1D_hjdp6"]
+blend_point_0/node = SubResource("AnimationNodeAnimation_qvq5k")
+blend_point_0/pos = -1.0
+blend_point_1/node = SubResource("AnimationNodeAnimation_q8t2r")
+blend_point_1/pos = 1.0
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_1g3ei"]
 advance_mode = 2
 
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_d4gfb"]
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_k1y6l"]
+advance_mode = 2
+advance_expression = "state_machine.state == run_state"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_3tdx2"]
+advance_mode = 2
+advance_expression = "state_machine.state == idle_state"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_sxasm"]
+advance_mode = 2
+advance_expression = "state_machine.state == run_state"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_thpkl"]
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_hdsdf"]
+switch_mode = 2
 advance_mode = 2
 
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_6oep1"]
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_j1n6r"]
+advance_mode = 2
+advance_expression = "state_machine.state == idle_state and jump_state.should_skid"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_j318c"]
+advance_mode = 2
+advance_expression = "state_machine.state == jump_state"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_jpvo8"]
+switch_mode = 2
 advance_mode = 2
 
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_pivhf"]
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_mk40q"]
 advance_mode = 2
+advance_expression = "state_machine.state == idle_state and not jump_state.should_skid"
 
-[sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_r70dy"]
-states/End/position = Vector2(554, 100.25)
-"states/Jump End/node" = SubResource("AnimationNodeBlendSpace1D_0e7vx")
-"states/Jump End/position" = Vector2(370.901, 1.96011)
-"states/Ladder End/node" = SubResource("AnimationNodeAnimation_w83nf")
-"states/Ladder End/position" = Vector2(370.59, 197.48)
-transitions = ["Start", "Ladder End", SubResource("AnimationNodeStateMachineTransition_e3nub"), "Ladder End", "End", SubResource("AnimationNodeStateMachineTransition_d4gfb"), "Start", "Jump End", SubResource("AnimationNodeStateMachineTransition_6oep1"), "Jump End", "End", SubResource("AnimationNodeStateMachineTransition_pivhf")]
-graph_offset = Vector2(19.7123, -305.04)
-
-[sub_resource type="AnimationNodeBlendSpace1D" id="AnimationNodeBlendSpace1D_lsf5j"]
-
-[sub_resource type="AnimationNodeBlendSpace1D" id="AnimationNodeBlendSpace1D_dkqrm"]
-
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_5due8"]
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_mhjhn"]
 advance_mode = 2
+advance_expression = "state_machine.state == climb_state"
 
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_vhu28"]
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_ehruc"]
 advance_mode = 2
+advance_expression = "state_machine.state == idle_state"
 
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_sjc5e"]
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_o751f"]
 advance_mode = 2
+advance_expression = "climb_state.at_end_of_ladder"
 
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_28yn8"]
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_kvjhf"]
 advance_mode = 2
+advance_expression = "not climb_state.at_end_of_ladder"
 
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_sa7g2"]
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_43goc"]
 advance_mode = 2
+advance_expression = "state_machine.state == jump_state"
 
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_21e3d"]
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_mjitu"]
 advance_mode = 2
+advance_expression = "state_machine.state == jump_state"
 
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_3vgoc"]
-advance_mode = 2
-
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_nnu24"]
-advance_mode = 2
-
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_fuk7v"]
-advance_mode = 2
-
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_dnuc8"]
-advance_mode = 2
-
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_44dou"]
-advance_mode = 2
-
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_wtg3n"]
-advance_mode = 2
-
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_jjpq2"]
-advance_mode = 2
-
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_y1hxu"]
-advance_mode = 2
-
-[sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_fb5go"]
-states/Climb/node = SubResource("AnimationNodeBlendSpace1D_3s7lq")
-states/Climb/position = Vector2(448.237, -46.4588)
-states/Death/node = SubResource("AnimationNodeAnimation_u8wuy")
-states/Death/position = Vector2(786.358, -45.1646)
-states/End/position = Vector2(948.5, -46.5472)
-states/Idle/node = SubResource("AnimationNodeStateMachine_r70dy")
-states/Idle/position = Vector2(333.012, 101.296)
-states/Jump/node = SubResource("AnimationNodeBlendSpace1D_lsf5j")
-states/Jump/position = Vector2(601.911, 251.549)
-states/Run/node = SubResource("AnimationNodeBlendSpace1D_dkqrm")
-states/Run/position = Vector2(600.859, 98.9642)
-states/Start/position = Vector2(200, 101.638)
-transitions = ["Run", "Jump", SubResource("AnimationNodeStateMachineTransition_5due8"), "Idle", "Run", SubResource("AnimationNodeStateMachineTransition_vhu28"), "Idle", "Jump", SubResource("AnimationNodeStateMachineTransition_sjc5e"), "Jump", "Idle", SubResource("AnimationNodeStateMachineTransition_28yn8"), "Run", "Idle", SubResource("AnimationNodeStateMachineTransition_sa7g2"), "Run", "Climb", SubResource("AnimationNodeStateMachineTransition_21e3d"), "Climb", "Idle", SubResource("AnimationNodeStateMachineTransition_3vgoc"), "Idle", "Climb", SubResource("AnimationNodeStateMachineTransition_nnu24"), "Start", "Idle", SubResource("AnimationNodeStateMachineTransition_fuk7v"), "Climb", "Death", SubResource("AnimationNodeStateMachineTransition_dnuc8"), "Idle", "Death", SubResource("AnimationNodeStateMachineTransition_44dou"), "Run", "Death", SubResource("AnimationNodeStateMachineTransition_wtg3n"), "Jump", "Death", SubResource("AnimationNodeStateMachineTransition_jjpq2"), "Death", "End", SubResource("AnimationNodeStateMachineTransition_y1hxu")]
-graph_offset = Vector2(67.2194, -281.22)
-
-[sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_vnk0a"]
-graph_offset = Vector2(-126.462, -188.5)
-nodes/StateMachine/node = SubResource("AnimationNodeStateMachine_fb5go")
-nodes/StateMachine/position = Vector2(100, 120)
-node_connections = [&"output", 0, &"StateMachine"]
+[sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_nnux6"]
+states/Climb/node = SubResource("AnimationNodeBlendTree_i3ifg")
+states/Climb/position = Vector2(292.828, -72.375)
+states/Death/node = SubResource("AnimationNodeBlendSpace1D_hhjyo")
+states/Death/position = Vector2(543.385, 100.272)
+states/End/position = Vector2(746, 100.277)
+"states/End Climb/node" = SubResource("AnimationNodeAnimation_quqs8")
+"states/End Climb/position" = Vector2(53.8851, -55.995)
+states/Idle/node = SubResource("AnimationNodeBlendSpace1D_sektc")
+states/Idle/position = Vector2(335.05, 100.3)
+states/Jump/node = SubResource("AnimationNodeBlendSpace1D_e8bpj")
+states/Jump/position = Vector2(284.255, 249.745)
+states/Run/node = SubResource("AnimationNodeBlendSpace1D_qmnkl")
+states/Run/position = Vector2(66.7876, 100.129)
+states/Skid/node = SubResource("AnimationNodeBlendSpace1D_hjdp6")
+states/Skid/position = Vector2(447.605, 250.245)
+states/Start/position = Vector2(224.025, 25)
+transitions = ["Start", "Idle", SubResource("AnimationNodeStateMachineTransition_1g3ei"), "Idle", "Run", SubResource("AnimationNodeStateMachineTransition_k1y6l"), "Run", "Idle", SubResource("AnimationNodeStateMachineTransition_3tdx2"), "End Climb", "Run", SubResource("AnimationNodeStateMachineTransition_sxasm"), "Idle", "Death", SubResource("AnimationNodeStateMachineTransition_thpkl"), "Death", "End", SubResource("AnimationNodeStateMachineTransition_hdsdf"), "Jump", "Skid", SubResource("AnimationNodeStateMachineTransition_j1n6r"), "Idle", "Jump", SubResource("AnimationNodeStateMachineTransition_j318c"), "Skid", "Idle", SubResource("AnimationNodeStateMachineTransition_jpvo8"), "Jump", "Idle", SubResource("AnimationNodeStateMachineTransition_mk40q"), "Idle", "Climb", SubResource("AnimationNodeStateMachineTransition_mhjhn"), "Climb", "Idle", SubResource("AnimationNodeStateMachineTransition_ehruc"), "Climb", "End Climb", SubResource("AnimationNodeStateMachineTransition_o751f"), "End Climb", "Climb", SubResource("AnimationNodeStateMachineTransition_kvjhf"), "Run", "Jump", SubResource("AnimationNodeStateMachineTransition_43goc"), "End Climb", "Jump", SubResource("AnimationNodeStateMachineTransition_mjitu")]
+graph_offset = Vector2(-705.562, -173.895)
 
 [node name="Player" type="CharacterBody2D"]
 collision_mask = 2
@@ -443,7 +604,9 @@ shape = SubResource("CapsuleShape2D_xsfub")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("1_27e4p")
+flip_h = true
 hframes = 18
+frame = 13
 
 [node name="LadderTopChecker" type="RayCast2D" parent="."]
 position = Vector2(0, 21)
@@ -462,21 +625,21 @@ collision_mask = 2
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 root_node = NodePath("../Sprite2D")
-autoplay = "running"
 libraries = {
 "": SubResource("AnimationLibrary_met8n")
 }
 
 [node name="AnimationTree" type="AnimationTree" parent="."]
-tree_root = SubResource("AnimationNodeBlendTree_vnk0a")
+tree_root = SubResource("AnimationNodeStateMachine_nnux6")
 anim_player = NodePath("../AnimationPlayer")
-parameters/StateMachine/Climb/blend_position = 0
-"parameters/StateMachine/Idle/Jump End/blend_position" = 0
-parameters/StateMachine/Jump/blend_position = 0
-parameters/StateMachine/Run/blend_position = 0
-
-[node name="LandingTimer" type="Timer" parent="."]
-wait_time = 0.15
+advance_expression_base_node = NodePath("..")
+active = true
+parameters/Climb/TimeScale/scale = 1.0
+parameters/Death/blend_position = 0
+parameters/Idle/blend_position = 0.000265718
+parameters/Jump/blend_position = 0
+parameters/Run/blend_position = 2.08165e-12
+parameters/Skid/blend_position = 0
 
 [node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("actor", "anim_tree", "initial_state")]
 script = ExtResource("2_h01ru")
@@ -484,8 +647,11 @@ actor = NodePath("..")
 anim_tree = NodePath("../AnimationTree")
 initial_state = NodePath("IdleState")
 
-[node name="ClimbState" type="Node" parent="StateMachine"]
+[node name="ClimbState" type="Node" parent="StateMachine" node_paths=PackedStringArray("platform_checker", "ladder_top_checker", "ladder_bottom_checker")]
 script = ExtResource("3_8qeu3")
+platform_checker = NodePath("../../PlatformBelowChecker")
+ladder_top_checker = NodePath("../../LadderTopChecker")
+ladder_bottom_checker = NodePath("../../LadderBottomChecker")
 
 [node name="IdleState" type="Node" parent="StateMachine"]
 script = ExtResource("3_ygm7w")
@@ -495,5 +661,3 @@ script = ExtResource("4_e73df")
 
 [node name="RunState" type="Node" parent="StateMachine"]
 script = ExtResource("4_hvfdt")
-
-[connection signal="timeout" from="LandingTimer" to="." method="_on_landing_timer_timeout"]

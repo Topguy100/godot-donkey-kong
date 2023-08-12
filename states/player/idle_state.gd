@@ -1,8 +1,11 @@
 class_name IdleState extends State
 
+signal input_pressed
+
 func on_enter():
 	super.on_enter()
-	anim_tree.
+	actor.velocity = Vector2.ZERO
 
-func on_exit():
-	super.on_exit()
+func _physics_process(_delta):
+	if Input.is_anything_pressed():
+		self.input_pressed.emit()
