@@ -11,7 +11,7 @@
 [sub_resource type="GDScript" id="GDScript_74ut7"]
 script/source = "extends CharacterBody2D
 
-const SPEED = 175.0
+const SPEED = 160.0
 enum BarrelType { REGULAR = 0, EXPLOSIVE }
 
 @export var direction := 1
