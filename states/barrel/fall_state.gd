@@ -6,7 +6,7 @@ var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 
 signal fell_to_floor
 
-func _process(delta):
+func _process(_delta):
 		anim_tree.set("parameters/StateMachine/Rolling/blend_position", actor.velocity.x)
 		anim_tree.set("parameters/TimeScale/scale", actor.velocity.x / actor.SPEED)
 

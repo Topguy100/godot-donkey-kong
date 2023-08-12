@@ -15,7 +15,7 @@ func on_enter():
 	super.on_enter()
 	actor.velocity = Vector2(actor.direction * actor.SPEED, 0)
 
-func _process(delta):
+func _process(_delta):
 	anim_tree.set("parameters/StateMachine/Rolling/blend_position", actor.velocity.x)
 	anim_tree.set("parameters/TimeScale/scale", actor.velocity.x / actor.SPEED)
 

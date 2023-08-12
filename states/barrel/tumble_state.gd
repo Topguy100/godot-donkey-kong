@@ -15,7 +15,7 @@ func on_exit():
 	actor.set_collision_mask_value(2, true)
 	actor.direction *= -1
 
-func _process(delta):
+func _process(_delta):
 	anim_tree.set("parameters/TimeScale/scale", 1)
 
 func _physics_process(_delta):
