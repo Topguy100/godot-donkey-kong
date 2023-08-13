@@ -90,6 +90,7 @@ _data = {
 texture = ExtResource("1_x1qnd")
 hframes = 5
 vframes = 2
+frame = 3
 script = SubResource("GDScript_cqbob")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]

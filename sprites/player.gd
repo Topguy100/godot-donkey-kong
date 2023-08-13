@@ -1,10 +1,14 @@
 class_name Player
 extends CharacterBody2D
 
+signal died
+
 @onready var ladder_bottom_checker = $LadderBottomChecker as RayCast2D
 @onready var ladder_top_checker = $LadderTopChecker as RayCast2D
 
 @onready var state_machine = $StateMachine as StateMachine
+@onready var anim_tree = $AnimationTree as AnimationTree
+@onready var anim_playback = anim_tree["parameters/playback"] as AnimationNodeStateMachinePlayback
 
 func _ready():
 	for state in state_machine.states as Array[PlayerState]:
@@ -46,3 +50,9 @@ func move_to_centre_of_ladder(checker: RayCast2D):
 	var rid = checker.get_collider_rid()
 	var tile_coord = tile_map.get_coords_for_body_rid(rid)
 	position.x = (tile_coord.x + 0.5) * tile_map.tile_set.tile_size.x + tile_map.position.x
+
+
+func _on_enemy_collision(_body):
+	state_machine.transition_to("Death")
+	anim_playback.travel("Death")
+	died.emit()

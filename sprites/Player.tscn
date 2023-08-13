@@ -1,4 +1,4 @@
-[gd_scene load_steps=60 format=3 uid="uid://chadcflauv6ap"]
+[gd_scene load_steps=62 format=3 uid="uid://chadcflauv6ap"]
 
 [ext_resource type="Texture2D" uid="uid://idelqjnu7633" path="res://assets/characters/Mario.png" id="1_27e4p"]
 [ext_resource type="Script" path="res://sprites/player.gd" id="1_ijjm8"]
@@ -7,10 +7,15 @@
 [ext_resource type="Script" path="res://states/player/idle_state.gd" id="3_ygm7w"]
 [ext_resource type="Script" path="res://states/player/jump_state.gd" id="4_e73df"]
 [ext_resource type="Script" path="res://states/player/run_state.gd" id="4_hvfdt"]
+[ext_resource type="Script" path="res://states/player/death_state.gd" id="5_kd45i"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_xsfub"]
 radius = 15.0
 height = 48.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_imyed"]
+radius = 13.0
+height = 42.0
 
 [sub_resource type="Animation" id="Animation_bmmu7"]
 resource_name = "climb"
@@ -481,6 +486,8 @@ advance_mode = 2
 advance_expression = "state.name == \"Run\""
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_thpkl"]
+advance_mode = 2
+advance_expression = "state.name == \"Death\""
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_hdsdf"]
 switch_mode = 2
@@ -555,11 +562,19 @@ transitions = ["Start", "Idle", SubResource("AnimationNodeStateMachineTransition
 graph_offset = Vector2(-705.562, -173.895)
 
 [node name="Player" type="CharacterBody2D"]
-collision_mask = 2
+collision_mask = 130
 script = ExtResource("1_ijjm8")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CapsuleShape2D_xsfub")
+
+[node name="EnemyCollisionArea" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 16
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyCollisionArea"]
+position = Vector2(-1, 0)
+shape = SubResource("CapsuleShape2D_imyed")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("1_27e4p")
@@ -611,6 +626,9 @@ platform_checker = NodePath("../../PlatformBelowChecker")
 ladder_top_checker = NodePath("../../LadderTopChecker")
 ladder_bottom_checker = NodePath("../../LadderBottomChecker")
 
+[node name="Death" type="Node" parent="StateMachine"]
+script = ExtResource("5_kd45i")
+
 [node name="Idle" type="Node" parent="StateMachine"]
 script = ExtResource("3_ygm7w")
 
@@ -619,3 +637,5 @@ script = ExtResource("4_e73df")
 
 [node name="Run" type="Node" parent="StateMachine"]
 script = ExtResource("4_hvfdt")
+
+[connection signal="body_entered" from="EnemyCollisionArea" to="." method="_on_enemy_collision"]

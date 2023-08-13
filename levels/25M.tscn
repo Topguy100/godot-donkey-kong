@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://b1ym76c3eelpf"]
+[gd_scene load_steps=13 format=3 uid="uid://b1ym76c3eelpf"]
 
 [ext_resource type="Texture2D" uid="uid://3j8rqyyg3fvm" path="res://assets/tiles/interface.png" id="1_o3f3q"]
 [ext_resource type="PackedScene" uid="uid://chadcflauv6ap" path="res://sprites/Player.tscn" id="2_3dq15"]
@@ -7,6 +7,22 @@
 [ext_resource type="PackedScene" uid="uid://c61xlueu1agd" path="res://interface/Lives.tscn" id="3_jaive"]
 [ext_resource type="PackedScene" uid="uid://c65mp7opiaw83" path="res://sprites/Donkey Kong.tscn" id="5_o4rb1"]
 [ext_resource type="Texture2D" uid="uid://d35n2rd0jotgv" path="res://assets/objects/Barrel Stack.png" id="5_qmcuh"]
+
+[sub_resource type="GDScript" id="GDScript_8miyy"]
+script/source = "extends Node2D
+
+@onready var player = $Player as Player
+@onready var barrels_group = $Barrels as Node2D
+@onready var donkey_kong = $\"Donkey Kong\"
+
+func _ready():
+	player.died.connect(player_died)
+
+func player_died():
+	donkey_kong.get_node(\"AnimationPlayer\").pause()
+	for barrel in barrels_group.get_children() as Array[Barrel]:
+		barrel.state_machine.transition_to(\"Freeze\")
+"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_lf0yl"]
 texture = ExtResource("1_o3f3q")
@@ -813,6 +829,7 @@ sources/1 = SubResource("TileSetAtlasSource_1hhh5")
 
 [node name="25M" type="Node2D"]
 position = Vector2(4, 4)
+script = SubResource("GDScript_8miyy")
 
 [node name="Interface" type="Node2D" parent="."]
 
@@ -865,4 +882,3 @@ position = Vector2(126, 198)
 
 [node name="Player" parent="." instance=ExtResource("2_3dq15")]
 position = Vector2(144, 720)
-collision_mask = 130
