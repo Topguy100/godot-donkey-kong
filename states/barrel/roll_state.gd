@@ -8,10 +8,10 @@ const ACCEL_X = 1000
 var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 var over_ladder = false
 
-
 func enter(params: Dictionary = {}):
 	super.enter(params)
 	actor.velocity = Vector2(actor.direction * actor.SPEED, 0)
+	anim_playback.travel("Rolling")
 
 func _process(_delta):
 	anim_tree.set("parameters/StateMachine/Rolling/blend_position", actor.velocity.x)

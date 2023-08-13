@@ -3,6 +3,7 @@ class_name StateMachine extends Node
 signal transitioned(state_name: StringName)
 
 @export var anim_tree: AnimationTree
+@export var anim_playback_path: StringName
 @export var initial_state := NodePath()
 
 var states: Array[State] = []
@@ -16,6 +17,7 @@ func _ready():
 			continue
 		
 		child_state.anim_tree = anim_tree
+		child_state.anim_playback = anim_tree[anim_playback_path]
 		child_state.transition_to.connect(transition_to)
 		child_state.transition_to_with_params.connect(transition_to)
 		states.append(child_state)

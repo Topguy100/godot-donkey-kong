@@ -7,6 +7,7 @@ func enter(params: Dictionary = {}):
 	super.enter(params)
 	actor.set_collision_mask_value(2, false)
 	actor.velocity = Vector2.ZERO
+	anim_playback.travel("Tumbling")
 
 func exit():
 	super.exit()

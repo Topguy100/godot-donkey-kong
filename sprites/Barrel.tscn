@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3 uid="uid://u87pjoxlflps"]
+[gd_scene load_steps=24 format=3 uid="uid://u87pjoxlflps"]
 
 [ext_resource type="Texture2D" uid="uid://c60kvbne1okf7" path="res://assets/objects/Regular Barrel.png" id="1_814dc"]
 [ext_resource type="Script" path="res://states/state_machine.gd" id="2_27a6e"]
@@ -11,7 +11,7 @@
 [sub_resource type="GDScript" id="GDScript_74ut7"]
 script/source = "extends CharacterBody2D
 
-const SPEED = 160.0
+const SPEED = 175.0
 enum BarrelType { REGULAR = 0, EXPLOSIVE }
 
 @export var direction := 1
@@ -31,27 +31,10 @@ func _ready():
 	sprites.texture = load(\"res://assets/objects/\" + texture_name + \" Barrel.png\")
 	
 	anim_tree.active = true
-	
-	velocity = Vector2(SPEED * direction, 5)
 "
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_tvcq3"]
 radius = 15.0
-
-[sub_resource type="Animation" id="Animation_vyqj1"]
-length = 0.001
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath(".:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [0]
-}
 
 [sub_resource type="Animation" id="Animation_11ply"]
 resource_name = "rolling_left"
@@ -106,7 +89,6 @@ tracks/0/keys = {
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_7kvpf"]
 _data = {
-"RESET": SubResource("Animation_vyqj1"),
 "rolling_left": SubResource("Animation_11ply"),
 "rolling_right": SubResource("Animation_o67k3"),
 "tumbling": SubResource("Animation_7qgjw")
@@ -132,11 +114,9 @@ animation = &"tumbling"
 advance_mode = 2
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_u0ewe"]
-advance_mode = 2
 advance_expression = "state.name == \"Tumble\""
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_mooyk"]
-advance_mode = 2
 advance_expression = "state.name != \"Tumble\""
 
 [sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_c6shn"]
@@ -145,7 +125,7 @@ states/Rolling/position = Vector2(370.94, 100.622)
 states/Tumbling/node = SubResource("AnimationNodeAnimation_iae1c")
 states/Tumbling/position = Vector2(570.483, 100.311)
 transitions = ["Start", "Rolling", SubResource("AnimationNodeStateMachineTransition_w7lih"), "Rolling", "Tumbling", SubResource("AnimationNodeStateMachineTransition_u0ewe"), "Tumbling", "Rolling", SubResource("AnimationNodeStateMachineTransition_mooyk")]
-graph_offset = Vector2(0.472694, -56.4525)
+graph_offset = Vector2(-432.745, -197.925)
 
 [sub_resource type="AnimationNodeTimeScale" id="AnimationNodeTimeScale_wyhcj"]
 
@@ -164,6 +144,7 @@ script = SubResource("GDScript_74ut7")
 texture = ExtResource("1_814dc")
 hframes = 2
 vframes = 3
+frame = 3
 
 [node name="CollisionShape" type="CollisionShape2D" parent="."]
 rotation = 1.5708
@@ -210,7 +191,8 @@ collision_mask = 2
 [node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("anim_tree")]
 script = ExtResource("2_27a6e")
 anim_tree = NodePath("../AnimationTree")
-initial_state = NodePath("Roll")
+anim_playback_path = &"parameters/StateMachine/playback"
+initial_state = NodePath("Freeze")
 
 [node name="Bounce" type="Node" parent="StateMachine"]
 script = ExtResource("3_654nl")

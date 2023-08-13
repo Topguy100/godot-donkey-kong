@@ -563,8 +563,8 @@ shape = SubResource("CapsuleShape2D_xsfub")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("1_27e4p")
+flip_h = true
 hframes = 18
-frame = 3
 
 [node name="LadderTopChecker" type="RayCast2D" parent="."]
 position = Vector2(0, 21)
@@ -602,6 +602,7 @@ parameters/Skid/blend_position = 1.0
 [node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("anim_tree")]
 script = ExtResource("2_h01ru")
 anim_tree = NodePath("../AnimationTree")
+anim_playback_path = &"parameters/playback"
 initial_state = NodePath("Idle")
 
 [node name="Climb" type="Node" parent="StateMachine" node_paths=PackedStringArray("platform_checker", "ladder_top_checker", "ladder_bottom_checker")]
