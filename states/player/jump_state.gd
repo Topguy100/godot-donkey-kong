@@ -1,19 +1,19 @@
-class_name JumpState extends State
+extends PlayerState
 
-signal landed
+const JUMP_VELOCITY = -290.0
 
 var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 var should_skid := false
 
-func on_enter():
-	super.on_enter()
-	should_skid = actor.velocity.x != 0
-	actor.velocity.y = actor.JUMP_VELOCITY
+func enter(params: Dictionary = {}):
+	super.enter(params)
+	should_skid = player.velocity.x != 0
+	player.velocity.y = JUMP_VELOCITY
 
 func _physics_process(delta):
-	actor.velocity.y += gravity * delta
+	player.velocity.y += gravity * delta
 	
-	actor.move_and_slide()
+	player.move_and_slide()
 	
-	if actor.is_on_floor():
-		landed.emit()
+	if player.is_on_floor():
+		transition_to.emit("Idle")

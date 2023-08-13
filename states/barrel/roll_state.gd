@@ -1,18 +1,16 @@
-class_name RollState extends State
+extends State
 
 @export var platform_checkers_group_name: String
 @export var ladder_top_checker: RayCast2D
 
-var ACCEL_X = 1000
+const ACCEL_X = 1000
 
 var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 var over_ladder = false
 
-signal rolled_off_platform
-signal rolled_over_ladder_top
 
-func on_enter():
-	super.on_enter()
+func enter(params: Dictionary = {}):
+	super.enter(params)
 	actor.velocity = Vector2(actor.direction * actor.SPEED, 0)
 
 func _process(_delta):
@@ -33,10 +31,17 @@ func check_for_freefall():
 		if detector.is_colliding():
 			return
 	
-	rolled_off_platform.emit()
+	transition_to.emit("Fall")
 
 func check_for_ladder_top():
-	if ladder_top_checker.is_colliding() and not over_ladder:
-		rolled_over_ladder_top.emit(ladder_top_checker)
+	if ladder_top_checker.is_colliding() and not over_ladder and randf() <= actor.tumble_chance:
+		move_to_centre_of_ladder()
+		transition_to.emit("Tumble")
 		
 	over_ladder = ladder_top_checker.is_colliding()
+
+func move_to_centre_of_ladder():
+	var tile_map : TileMap = ladder_top_checker.get_collider()
+	var rid = ladder_top_checker.get_collider_rid()
+	var tile_coord = tile_map.get_coords_for_body_rid(rid)
+	actor.position.x = (tile_coord.x + 0.5) * tile_map.tile_set.tile_size.x + tile_map.position.x

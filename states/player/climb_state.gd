@@ -1,6 +1,6 @@
-class_name ClimbState extends State
+extends PlayerState
 
-signal input_pressed
+const SPEED = 130.0
 
 @export var platform_checker: RayCast2D
 @export var ladder_top_checker: RayCast2D
@@ -8,23 +8,23 @@ signal input_pressed
 
 var at_end_of_ladder := false
 
-func on_enter():
-	super.on_enter()
+func enter(params: Dictionary = {}):
+	super.enter(params)
 	
 	# Stop checking for platform collisions while climbing
-	actor.set_collision_mask_value(2, false)
+	player.set_collision_mask_value(2, false)
 	
 	# Turn off horizontal movement
-	actor.velocity.x = 0
+	player.velocity.x = 0
 	
-func on_exit():
-	super.on_exit()
+func exit():
+	super.exit()
 	
 	# Resume checking for platform collisions
-	actor.set_collision_mask_value(2, true)
+	player.set_collision_mask_value(2, true)
 
 func _process(_delta):
-	anim_tree["parameters/Climb/TimeScale/scale"] = actor.velocity.y != 0
+	anim_tree["parameters/Climb/TimeScale/scale"] = player.velocity.y != 0
 
 func _physics_process(_delta):
 	at_end_of_ladder = (
@@ -37,11 +37,11 @@ func _physics_process(_delta):
 	if ((y_axis == -1 and not ladder_top_checker.is_colliding()) or
 		(y_axis == 1 and not ladder_bottom_checker.is_colliding())
 	):
-		actor.velocity.y = y_axis * actor.SPEED
+		player.velocity.y = y_axis * SPEED
 	else:
-		actor.velocity.y = 0
+		player.velocity.y = 0
 	
-	actor.move_and_slide()
+	player.move_and_slide()
 
-	if at_end_of_ladder and Input.is_anything_pressed():
-		input_pressed.emit()
+	if at_end_of_ladder:
+		ready_for_state_change.emit()

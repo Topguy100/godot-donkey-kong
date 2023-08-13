@@ -1,11 +1,9 @@
-class_name BounceState extends State
+extends State
 
 var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 
-signal finished_bounce
-
-func on_enter():
-	super.on_enter()
+func enter(params: Dictionary = {}):
+	super.enter(params)
 	actor.velocity = Vector2(0, -150)
 	actor.direction *= -1
 
@@ -20,4 +18,4 @@ func _physics_process(delta):
 	actor.move_and_slide()
 
 	if actor.is_on_floor():
-		finished_bounce.emit()
+		transition_to.emit("Roll")

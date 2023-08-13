@@ -1,31 +1,41 @@
 class_name StateMachine extends Node
 
-@export var actor: Node
+signal transitioned(state_name: StringName)
+
 @export var anim_tree: AnimationTree
-@export var initial_state: State
+@export var initial_state := NodePath()
 
 var states: Array[State] = []
-var state: State
+@onready var state: State
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	for child in get_children():
-		if not child is State:
+		var child_state = child as State
+		if not child_state:
 			continue
 		
-		child.actor = self.actor
-		child.anim_tree = self.anim_tree
-		self.states.append(child)
+		child_state.anim_tree = anim_tree
+		child_state.transition_to.connect(transition_to)
+		child_state.transition_to_with_params.connect(transition_to)
+		states.append(child_state)
 	
-	if self.initial_state:
-		self.change_state(self.initial_state)
+	# Enter the initial state
+	state = get_node(initial_state)
+	state.enter()
 
-func change_state(new_state: State):
-	if new_state == self.state:
+func state_with_path(state_path: NodePath) -> State:
+	if not has_node(state_path):
+		return null
+
+	return get_node(state_path) as State
+
+func transition_to(state_path: NodePath, params: Dictionary = {}):
+	var new_state = state_with_path(state_path)
+	if not new_state or state == new_state:
 		return
-
-	if self.state:
-		self.state.on_exit()
-
-	self.state = new_state
-	self.state.on_enter()
+	
+	state.exit()
+	state = new_state
+	state.enter(params)
+	transitioned.emit(state.name)

@@ -20,14 +20,8 @@ enum BarrelType { REGULAR = 0, EXPLOSIVE }
 
 var barrel_type: BarrelType
 
-@onready var sprites = $Sprite2D
-@onready var anim_tree = $AnimationTree
-@onready var state_machine = $StateMachine
-@onready var bounce_state = $StateMachine/BounceState as BounceState
-@onready var fall_state = $StateMachine/FallState as FallState
-@onready var freeze_state = $StateMachine/FreezeState
-@onready var roll_state = $StateMachine/RollState as RollState
-@onready var tumble_state = $StateMachine/TumbleState as TumbleState
+@onready var sprites = $Sprite2D as Sprite2D
+@onready var anim_tree = $AnimationTree as AnimationTree
 
 func _init():
 	barrel_type = BarrelType.REGULAR if randf() > explosive_chance else BarrelType.EXPLOSIVE
@@ -38,24 +32,7 @@ func _ready():
 	
 	anim_tree.active = true
 	
-	bounce_state.finished_bounce.connect(self.state_machine.change_state.bind(roll_state))
-	fall_state.fell_to_floor.connect(self.state_machine.change_state.bind(bounce_state))
-	roll_state.rolled_off_platform.connect(self.state_machine.change_state.bind(fall_state))
-	roll_state.rolled_over_ladder_top.connect(self.rolled_over_ladder_top)
-	tumble_state.tumbled_to_bottom_of_ladder.connect(self.state_machine.change_state.bind(roll_state))
-	
 	velocity = Vector2(SPEED * direction, 5)
-	
-func rolled_over_ladder_top(checker):
-	if randf() <= tumble_chance:
-		move_to_centre_of_ladder(checker)
-		state_machine.change_state(tumble_state)
-
-func move_to_centre_of_ladder(checker):
-	var tile_map : TileMap = checker.get_collider()
-	var rid = checker.get_collider_rid()
-	var tile_coord = tile_map.get_coords_for_body_rid(rid)
-	position.x = (tile_coord.x + 0.5) * tile_map.tile_set.tile_size.x + tile_map.position.x
 "
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_tvcq3"]
@@ -156,11 +133,11 @@ advance_mode = 2
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_u0ewe"]
 advance_mode = 2
-advance_expression = "state_machine.state == tumble_state"
+advance_expression = "state.name == \"Tumble\""
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_mooyk"]
 advance_mode = 2
-advance_expression = "state_machine.state != tumble_state"
+advance_expression = "state.name != \"Tumble\""
 
 [sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_c6shn"]
 states/Rolling/node = SubResource("AnimationNodeBlendSpace1D_iy5fh")
@@ -173,7 +150,7 @@ graph_offset = Vector2(0.472694, -56.4525)
 [sub_resource type="AnimationNodeTimeScale" id="AnimationNodeTimeScale_wyhcj"]
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_sane2"]
-graph_offset = Vector2(-306.24, 59.52)
+graph_offset = Vector2(-433.92, -43)
 nodes/StateMachine/node = SubResource("AnimationNodeStateMachine_c6shn")
 nodes/StateMachine/position = Vector2(-90, 130)
 nodes/TimeScale/node = SubResource("AnimationNodeTimeScale_wyhcj")
@@ -201,7 +178,7 @@ libraries = {
 [node name="AnimationTree" type="AnimationTree" parent="."]
 tree_root = SubResource("AnimationNodeBlendTree_sane2")
 anim_player = NodePath("../AnimationPlayer")
-advance_expression_base_node = NodePath("..")
+advance_expression_base_node = NodePath("../StateMachine")
 parameters/StateMachine/Rolling/blend_position = 2.08165e-12
 parameters/TimeScale/scale = 1.0
 
@@ -230,27 +207,26 @@ position = Vector2(2.08165e-12, 15)
 target_position = Vector2(2.08165e-12, 3)
 collision_mask = 2
 
-[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("actor", "anim_tree", "initial_state")]
+[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("anim_tree")]
 script = ExtResource("2_27a6e")
-actor = NodePath("..")
 anim_tree = NodePath("../AnimationTree")
-initial_state = NodePath("RollState")
+initial_state = NodePath("Roll")
 
-[node name="BounceState" type="Node" parent="StateMachine"]
+[node name="Bounce" type="Node" parent="StateMachine"]
 script = ExtResource("3_654nl")
 
-[node name="FallState" type="Node" parent="StateMachine"]
+[node name="Fall" type="Node" parent="StateMachine"]
 script = ExtResource("4_5umik")
 
-[node name="FreezeState" type="Node" parent="StateMachine"]
+[node name="Freeze" type="Node" parent="StateMachine"]
 script = ExtResource("5_h5cu4")
 
-[node name="RollState" type="Node" parent="StateMachine" node_paths=PackedStringArray("ladder_top_checker")]
+[node name="Roll" type="Node" parent="StateMachine" node_paths=PackedStringArray("ladder_top_checker")]
 script = ExtResource("3_kanbc")
 platform_checkers_group_name = "BarrelPlatformDetectors"
 ladder_top_checker = NodePath("../../LadderTopChecker")
 
-[node name="TumbleState" type="Node" parent="StateMachine" node_paths=PackedStringArray("ladder_bottom_checker", "platform_below_checker")]
+[node name="Tumble" type="Node" parent="StateMachine" node_paths=PackedStringArray("ladder_bottom_checker", "platform_below_checker")]
 script = ExtResource("6_1d25j")
 ladder_bottom_checker = NodePath("../../LadderBottomChecker")
 platform_below_checker = NodePath("../../PlatformBelowChecker")

@@ -1,12 +1,11 @@
-class_name RunState extends State
+extends PlayerState
 
-signal finished_running
-signal input_pressed
+const SPEED = 130.0
 
 var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 
-func on_enter():
-	super.on_enter()
+func enter(params: Dictionary = {}):
+	super.enter(params)
 
 func _process(_delta):
 	var x_axis = Input.get_axis("ui_left", "ui_right")
@@ -18,13 +17,9 @@ func _process(_delta):
 
 func _physics_process(delta):
 	var x_axis = Input.get_axis("ui_left", "ui_right")
-	actor.velocity.x = x_axis * actor.SPEED
-	actor.velocity.y += gravity * delta
+	player.velocity.x = x_axis * SPEED
+	player.velocity.y += gravity * delta
 	
-	actor.move_and_slide()
+	player.move_and_slide()
 	
-	if Input.is_anything_pressed():
-		input_pressed.emit()
-	
-	if x_axis == 0:
-		finished_running.emit()
+	ready_for_state_change.emit()

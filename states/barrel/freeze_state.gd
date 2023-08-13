@@ -1,9 +1,9 @@
-class_name FreezeState extends State
+extends State
 
-func on_enter():
-	super.on_enter()
+func enter(params: Dictionary = {}):
+	super.enter(params)
 	anim_tree.active = false
 	
-func on_exit():
-	super.on_exit()
+func exit():
+	super.exit()
 	anim_tree.active = true

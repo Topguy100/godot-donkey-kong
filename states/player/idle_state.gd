@@ -1,11 +1,8 @@
-class_name IdleState extends State
+extends PlayerState
 
-signal input_pressed
-
-func on_enter():
-	super.on_enter()
-	actor.velocity = Vector2.ZERO
+func enter(params: Dictionary = {}):
+	super.enter(params)
+	player.velocity = Vector2.ZERO
 
 func _physics_process(_delta):
-	if Input.is_anything_pressed():
-		self.input_pressed.emit()
+	ready_for_state_change.emit()
