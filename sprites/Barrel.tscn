@@ -1,37 +1,13 @@
 [gd_scene load_steps=24 format=3 uid="uid://u87pjoxlflps"]
 
 [ext_resource type="Texture2D" uid="uid://c60kvbne1okf7" path="res://assets/objects/Regular Barrel.png" id="1_814dc"]
+[ext_resource type="Script" path="res://sprites/barrel.gd" id="1_n7vin"]
 [ext_resource type="Script" path="res://states/state_machine.gd" id="2_27a6e"]
 [ext_resource type="Script" path="res://states/barrel/bounce_state.gd" id="3_654nl"]
 [ext_resource type="Script" path="res://states/barrel/roll_state.gd" id="3_kanbc"]
 [ext_resource type="Script" path="res://states/barrel/fall_state.gd" id="4_5umik"]
 [ext_resource type="Script" path="res://states/barrel/freeze_state.gd" id="5_h5cu4"]
 [ext_resource type="Script" path="res://states/barrel/tumble_state.gd" id="6_1d25j"]
-
-[sub_resource type="GDScript" id="GDScript_74ut7"]
-script/source = "extends CharacterBody2D
-
-const SPEED = 175.0
-enum BarrelType { REGULAR = 0, EXPLOSIVE }
-
-@export var direction := 1
-@export var explosive_chance := 0.1
-@export var tumble_chance := 0.3
-
-var barrel_type: BarrelType
-
-@onready var sprites = $Sprite2D as Sprite2D
-@onready var anim_tree = $AnimationTree as AnimationTree
-
-func _init():
-	barrel_type = BarrelType.REGULAR if randf() > explosive_chance else BarrelType.EXPLOSIVE
-
-func _ready():
-	var texture_name = BarrelType.keys()[barrel_type].to_camel_case()
-	sprites.texture = load(\"res://assets/objects/\" + texture_name + \" Barrel.png\")
-	
-	anim_tree.active = true
-"
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_tvcq3"]
 radius = 15.0
@@ -138,7 +114,9 @@ nodes/TimeScale/position = Vector2(120, 130)
 node_connections = [&"output", 0, &"TimeScale", &"TimeScale", 0, &"StateMachine"]
 
 [node name="Barrel" type="CharacterBody2D"]
-script = SubResource("GDScript_74ut7")
+collision_layer = 16
+collision_mask = 2
+script = ExtResource("1_n7vin")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("1_814dc")
@@ -161,14 +139,14 @@ tree_root = SubResource("AnimationNodeBlendTree_sane2")
 anim_player = NodePath("../AnimationPlayer")
 advance_expression_base_node = NodePath("../StateMachine")
 parameters/StateMachine/Rolling/blend_position = 2.08165e-12
-parameters/TimeScale/scale = 1.0
+parameters/TimeScale/scale = 0.1
 
-[node name="PlatformDetectorLeft" type="RayCast2D" parent="." groups=["BarrelPlatformDetectors"]]
+[node name="PlatformDetectorLeft" type="RayCast2D" parent="."]
 position = Vector2(-15, 0)
 target_position = Vector2(0, 23)
 collision_mask = 2
 
-[node name="PlatformDetectorRight" type="RayCast2D" parent="." groups=["BarrelPlatformDetectors"]]
+[node name="PlatformDetectorRight" type="RayCast2D" parent="."]
 position = Vector2(15, 0)
 target_position = Vector2(0, 22)
 collision_mask = 2
@@ -203,9 +181,9 @@ script = ExtResource("4_5umik")
 [node name="Freeze" type="Node" parent="StateMachine"]
 script = ExtResource("5_h5cu4")
 
-[node name="Roll" type="Node" parent="StateMachine" node_paths=PackedStringArray("ladder_top_checker")]
+[node name="Roll" type="Node" parent="StateMachine" node_paths=PackedStringArray("platform_detectors", "ladder_top_checker")]
 script = ExtResource("3_kanbc")
-platform_checkers_group_name = "BarrelPlatformDetectors"
+platform_detectors = [NodePath("../../PlatformDetectorLeft"), NodePath("../../PlatformDetectorRight")]
 ladder_top_checker = NodePath("../../LadderTopChecker")
 
 [node name="Tumble" type="Node" parent="StateMachine" node_paths=PackedStringArray("ladder_bottom_checker", "platform_below_checker")]

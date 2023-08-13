@@ -1,6 +1,6 @@
 extends State
 
-@export var platform_checkers_group_name: String
+@export var platform_detectors: Array[RayCast2D]
 @export var ladder_top_checker: RayCast2D
 
 const ACCEL_X = 1000
@@ -27,7 +27,7 @@ func _physics_process(delta):
 	check_for_ladder_top()
 
 func check_for_freefall():
-	for detector in get_tree().get_nodes_in_group(platform_checkers_group_name) as Array[RayCast2D]:
+	for detector in platform_detectors:
 		if detector.is_colliding():
 			return
 	
