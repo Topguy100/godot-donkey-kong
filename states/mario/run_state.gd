@@ -1,4 +1,4 @@
-extends PlayerState
+extends MarioState
 
 const SPEED = 130.0
 
@@ -17,9 +17,9 @@ func _process(_delta):
 
 func _physics_process(delta):
 	var x_axis = Input.get_axis("ui_left", "ui_right")
-	player.velocity.x = x_axis * SPEED
-	player.velocity.y += gravity * delta
+	mario.velocity.x = x_axis * SPEED
+	mario.velocity.y += gravity * delta
 	
-	player.move_and_slide()
+	mario.move_and_slide()
 	
 	ready_for_state_change.emit()

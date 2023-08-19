@@ -1,13 +1,13 @@
 [gd_scene load_steps=62 format=3 uid="uid://chadcflauv6ap"]
 
 [ext_resource type="Texture2D" uid="uid://idelqjnu7633" path="res://assets/characters/Mario.png" id="1_27e4p"]
-[ext_resource type="Script" path="res://sprites/player.gd" id="1_ijjm8"]
+[ext_resource type="Script" path="res://sprites/mario.gd" id="1_h6gh8"]
 [ext_resource type="Script" path="res://states/state_machine.gd" id="2_h01ru"]
-[ext_resource type="Script" path="res://states/player/climb_state.gd" id="3_8qeu3"]
-[ext_resource type="Script" path="res://states/player/idle_state.gd" id="3_ygm7w"]
-[ext_resource type="Script" path="res://states/player/jump_state.gd" id="4_e73df"]
-[ext_resource type="Script" path="res://states/player/run_state.gd" id="4_hvfdt"]
-[ext_resource type="Script" path="res://states/player/death_state.gd" id="5_kd45i"]
+[ext_resource type="Script" path="res://states/mario/climb_state.gd" id="4_5vjpb"]
+[ext_resource type="Script" path="res://states/mario/death_state.gd" id="5_52xts"]
+[ext_resource type="Script" path="res://states/mario/idle_state.gd" id="6_w6l7k"]
+[ext_resource type="Script" path="res://states/mario/jump_state.gd" id="7_330gi"]
+[ext_resource type="Script" path="res://states/mario/run_state.gd" id="8_hv0pb"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_xsfub"]
 radius = 15.0
@@ -563,7 +563,7 @@ graph_offset = Vector2(-705.562, -173.895)
 
 [node name="Player" type="CharacterBody2D"]
 collision_mask = 130
-script = ExtResource("1_ijjm8")
+script = ExtResource("1_h6gh8")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CapsuleShape2D_xsfub")
@@ -621,21 +621,21 @@ anim_playback_path = &"parameters/playback"
 initial_state = NodePath("Idle")
 
 [node name="Climb" type="Node" parent="StateMachine" node_paths=PackedStringArray("platform_checker", "ladder_top_checker", "ladder_bottom_checker")]
-script = ExtResource("3_8qeu3")
+script = ExtResource("4_5vjpb")
 platform_checker = NodePath("../../PlatformBelowChecker")
 ladder_top_checker = NodePath("../../LadderTopChecker")
 ladder_bottom_checker = NodePath("../../LadderBottomChecker")
 
 [node name="Death" type="Node" parent="StateMachine"]
-script = ExtResource("5_kd45i")
+script = ExtResource("5_52xts")
 
 [node name="Idle" type="Node" parent="StateMachine"]
-script = ExtResource("3_ygm7w")
+script = ExtResource("6_w6l7k")
 
 [node name="Jump" type="Node" parent="StateMachine"]
-script = ExtResource("4_e73df")
+script = ExtResource("7_330gi")
 
 [node name="Run" type="Node" parent="StateMachine"]
-script = ExtResource("4_hvfdt")
+script = ExtResource("8_hv0pb")
 
 [connection signal="body_entered" from="EnemyCollisionArea" to="." method="_on_enemy_collision"]

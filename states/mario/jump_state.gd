@@ -1,4 +1,4 @@
-extends PlayerState
+extends MarioState
 
 const JUMP_VELOCITY = -290.0
 
@@ -7,13 +7,13 @@ var should_skid := false
 
 func enter(params: Dictionary = {}):
 	super.enter(params)
-	should_skid = player.velocity.x != 0
-	player.velocity.y = JUMP_VELOCITY
+	should_skid = mario.velocity.x != 0
+	mario.velocity.y = JUMP_VELOCITY
 
 func _physics_process(delta):
-	player.velocity.y += gravity * delta
+	mario.velocity.y += gravity * delta
 	
-	player.move_and_slide()
+	mario.move_and_slide()
 	
-	if player.is_on_floor():
+	if mario.is_on_floor():
 		transition_to.emit("Idle")
