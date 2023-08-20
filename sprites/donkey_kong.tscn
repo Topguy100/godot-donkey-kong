@@ -288,6 +288,7 @@ libraries = {
 }
 
 [node name="ThrowIntervalTimer" type="Timer" parent="."]
-wait_time = 2.1
+wait_time = 2.0
+autostart = true
 
 [connection signal="timeout" from="ThrowIntervalTimer" to="." method="_on_timer_timeout"]
