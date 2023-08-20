@@ -12,8 +12,8 @@ func enter(params: Dictionary = {}):
 
 func _physics_process(delta):
 	mario.velocity.y += gravity * delta
-	
+
 	mario.move_and_slide()
-	
+
 	if mario.is_on_floor():
 		transition_to.emit("Idle")

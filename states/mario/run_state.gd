@@ -16,10 +16,10 @@ func _process(_delta):
 	anim_tree["parameters/Skid/blend_position"] = x_axis
 
 func _physics_process(delta):
-	var x_axis = Input.get_axis("ui_left", "ui_right")
+	var x_axis = Input.get_axis("left", "right")
 	mario.velocity.x = x_axis * SPEED
 	mario.velocity.y += gravity * delta
-	
+
 	mario.move_and_slide()
-	
+
 	ready_for_state_change.emit()

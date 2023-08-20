@@ -26,13 +26,13 @@ func transition_via_inputs():
 		return
 
 	# Check for attempts to run
-	var x_axis = Input.get_axis("ui_left", "ui_right")
+	var x_axis = Input.get_axis("left", "right")
 	if x_axis:
 		state_machine.transition_to("Run")
 		return
 
 	# Check for attempts to climb
-	var y_axis = Input.get_axis("ui_up", "ui_down")
+	var y_axis = Input.get_axis("up", "down")
 	if y_axis == -1 and ladder_bottom_checker.is_colliding():
 		move_to_centre_of_ladder(ladder_bottom_checker)
 		state_machine.transition_to("Climb")
