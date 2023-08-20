@@ -1,11 +1,13 @@
-[gd_scene load_steps=6 format=3 uid="uid://c65mp7opiaw83"]
+[gd_scene load_steps=9 format=3 uid="uid://c65mp7opiaw83"]
 
 [ext_resource type="Texture2D" uid="uid://bui1miwvtl1wb" path="res://assets/characters/Donkey Kong.png" id="1_x1qnd"]
 [ext_resource type="Script" path="res://sprites/donkey_kong.gd" id="2_5tj4c"]
+[ext_resource type="Texture2D" uid="uid://c60kvbne1okf7" path="res://assets/objects/Regular Barrel.png" id="3_rehkj"]
+[ext_resource type="Texture2D" uid="uid://dm28dl4cnpksw" path="res://assets/objects/Explosive Barrel.png" id="4_y3qsf"]
 
 [sub_resource type="Animation" id="Animation_ku7n1"]
 resource_name = "idle"
-length = 0.001
+length = 0.2
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -20,9 +22,8 @@ tracks/0/keys = {
 }
 
 [sub_resource type="Animation" id="Animation_viwov"]
-resource_name = "throw_barrel"
-length = 2.1
-loop_mode = 1
+resource_name = "throw_regular_barrel"
+length = 1.2
 step = 0.35
 tracks/0/type = "value"
 tracks/0/imported = false
@@ -43,41 +44,169 @@ tracks/1/path = NodePath(".")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
-"times": PackedFloat32Array(0.35, 0.7, 1.05),
-"transitions": PackedFloat32Array(1, 1, 1),
+"times": PackedFloat32Array(1.05),
+"transitions": PackedFloat32Array(1),
 "values": [{
-"args": [],
-"method": &"spawn_barrel"
-}, {
-"args": [],
-"method": &"move_barrel"
-}, {
 "args": [],
 "method": &"launch_barrel"
 }]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Barrel:texture")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [ExtResource("3_rehkj")]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Barrel:visible")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 0.35, 1.05),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [false, true, false]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("Barrel:frame")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0.35, 0.7),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [4, 0]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("Barrel:position")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0.35, 0.7),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [Vector2(0, 30), Vector2(78, 36)]
+}
+
+[sub_resource type="Animation" id="Animation_20ehg"]
+resource_name = "throw_explosive_barrel"
+length = 1.2
+step = 0.35
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.35, 0.7, 1.05),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 1,
+"values": [1, 2, 3, 0]
+}
+tracks/1/type = "method"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(1.05),
+"transitions": PackedFloat32Array(1),
+"values": [{
+"args": [],
+"method": &"launch_barrel"
+}]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Barrel:texture")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [ExtResource("4_y3qsf")]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Barrel:visible")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 0.35, 1.05),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [false, true, false]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("Barrel:frame")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0.35, 0.7),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [4, 0]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("Barrel:position")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0.35, 0.7),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [Vector2(0, 30), Vector2(78, 36)]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_pjsoj"]
 _data = {
 "idle": SubResource("Animation_ku7n1"),
-"throw_barrel": SubResource("Animation_viwov")
+"throw_explosive_barrel": SubResource("Animation_20ehg"),
+"throw_regular_barrel": SubResource("Animation_viwov")
 }
 
-[node name="Donkey Kong" type="Sprite2D"]
+[node name="Donkey Kong" type="Sprite2D" groups=["freezable"]]
 texture = ExtResource("1_x1qnd")
 hframes = 5
 vframes = 2
-frame = 3
 script = ExtResource("2_5tj4c")
 
+[node name="Barrel" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(78, 36)
+texture = ExtResource("4_y3qsf")
+hframes = 2
+vframes = 3
+
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
-autoplay = "throw_barrel"
+autoplay = "idle"
 libraries = {
 "": SubResource("AnimationLibrary_pjsoj")
 }
 
-[node name="BarrelSpawnPoint" type="Marker2D" parent="."]
-position = Vector2(2.08165e-12, 30)
+[node name="Timer" type="Timer" parent="."]
+wait_time = 2.1
+autostart = true
 
-[node name="BarrelMovePoint" type="Marker2D" parent="."]
-position = Vector2(78, 36)
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

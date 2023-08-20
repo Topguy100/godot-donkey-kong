@@ -891,9 +891,9 @@ position = Vector2(21, 720)
 texture = ExtResource("9_oop6w")
 hframes = 4
 
-[node name="Donkey Kong" parent="." instance=ExtResource("5_o4rb1")]
+[node name="Donkey Kong" parent="." node_paths=PackedStringArray("barrels_group") instance=ExtResource("5_o4rb1")]
 position = Vector2(126, 198)
-frame = 0
+barrels_group = NodePath("../Barrels")
 
 [node name="Collectables" type="Node2D" parent="."]
 
