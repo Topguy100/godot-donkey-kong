@@ -6,6 +6,7 @@ var new_barrel: Barrel
 @export var barrels_group : Node
 @onready var anim_barrel = $Barrel as Sprite2D
 @onready var anim_player = $AnimationPlayer as AnimationPlayer
+@onready var throw_timer = $Timer as Timer
 
 func throw_barrel():
 	new_barrel = barrel_scene.instantiate()
@@ -22,3 +23,10 @@ func launch_barrel():
 
 func _on_timer_timeout():
 	throw_barrel()
+
+func freeze(freeze: bool):
+	if freeze:
+		throw_timer.stop()
+		anim_player.play("idle")
+	else:
+		throw_timer.start()

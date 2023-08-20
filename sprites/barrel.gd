@@ -14,6 +14,7 @@ const TEXTURES = {
 @export var tumble_chance := 0.3
 
 var type: Type
+var unfrozen_state := "Roll"
 
 @onready var sprite = $Sprite2D as Sprite2D
 @onready var anim_tree = $AnimationTree as AnimationTree
@@ -25,3 +26,11 @@ func _init():
 func _ready():
 	sprite.texture = TEXTURES[type]
 	anim_tree.active = true
+
+func freeze(freeze: bool):
+	if freeze:
+		unfrozen_state = state_machine.state.name
+		state_machine.transition_to("Freeze")
+	else:
+		state_machine.transition_to(unfrozen_state)
+

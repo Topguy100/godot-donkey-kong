@@ -20,7 +20,7 @@ func _process(_delta):
 func _physics_process(delta):
 	actor.velocity.x = move_toward(actor.velocity.x, actor.SPEED * actor.direction, ACCEL_X * delta)
 	actor.velocity.y += gravity * delta
-	
+
 	actor.move_and_slide()
 
 	check_for_freefall()
@@ -30,14 +30,14 @@ func check_for_freefall():
 	for detector in platform_detectors:
 		if detector.is_colliding():
 			return
-	
+
 	transition_to.emit("Fall")
 
 func check_for_ladder_top():
 	if ladder_top_checker.is_colliding() and not over_ladder and randf() <= actor.tumble_chance:
 		move_to_centre_of_ladder()
 		transition_to.emit("Tumble")
-		
+
 	over_ladder = ladder_top_checker.is_colliding()
 
 func move_to_centre_of_ladder():

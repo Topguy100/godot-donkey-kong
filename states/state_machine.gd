@@ -15,13 +15,13 @@ func _ready():
 		var child_state = child as State
 		if not child_state:
 			continue
-		
+
 		child_state.anim_tree = anim_tree
 		child_state.anim_playback = anim_tree[anim_playback_path]
 		child_state.transition_to.connect(transition_to)
 		child_state.transition_to_with_params.connect(transition_to)
 		states.append(child_state)
-	
+
 	# Enter the initial state
 	state = get_node(initial_state)
 	state.enter()
@@ -36,7 +36,7 @@ func transition_to(state_path: NodePath, params: Dictionary = {}):
 	var new_state = state_with_path(state_path)
 	if not new_state or state == new_state:
 		return
-	
+
 	state.exit()
 	state = new_state
 	state.enter(params)

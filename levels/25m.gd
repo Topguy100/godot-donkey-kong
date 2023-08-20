@@ -8,6 +8,5 @@ func _ready():
 	mario.died.connect(mario_died)
 
 func mario_died():
-	donkey_kong.get_node("AnimationPlayer").pause()
-	for barrel in barrels_group.get_children() as Array[Barrel]:
-		barrel.state_machine.transition_to("Freeze")
+	for node in get_tree().get_nodes_in_group("freezable"):
+		node.freeze(true)

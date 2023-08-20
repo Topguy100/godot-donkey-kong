@@ -1,13 +1,13 @@
 [gd_scene load_steps=24 format=3 uid="uid://u87pjoxlflps"]
 
-[ext_resource type="Texture2D" uid="uid://c60kvbne1okf7" path="res://assets/objects/Regular Barrel.png" id="1_814dc"]
-[ext_resource type="Script" path="res://sprites/barrel.gd" id="1_n7vin"]
-[ext_resource type="Script" path="res://states/state_machine.gd" id="2_27a6e"]
-[ext_resource type="Script" path="res://states/barrel/bounce_state.gd" id="3_654nl"]
-[ext_resource type="Script" path="res://states/barrel/roll_state.gd" id="3_kanbc"]
-[ext_resource type="Script" path="res://states/barrel/fall_state.gd" id="4_5umik"]
-[ext_resource type="Script" path="res://states/barrel/freeze_state.gd" id="5_h5cu4"]
-[ext_resource type="Script" path="res://states/barrel/tumble_state.gd" id="6_1d25j"]
+[ext_resource type="Script" path="res://sprites/barrel.gd" id="1_4uqv0"]
+[ext_resource type="Texture2D" uid="uid://c60kvbne1okf7" path="res://assets/objects/Regular Barrel.png" id="2_e3jk2"]
+[ext_resource type="Script" path="res://states/state_machine.gd" id="3_fq25c"]
+[ext_resource type="Script" path="res://states/barrel/bounce_state.gd" id="4_g3hjp"]
+[ext_resource type="Script" path="res://states/barrel/fall_state.gd" id="5_0fiut"]
+[ext_resource type="Script" path="res://states/barrel/freeze_state.gd" id="6_knr1n"]
+[ext_resource type="Script" path="res://states/barrel/roll_state.gd" id="7_yrwof"]
+[ext_resource type="Script" path="res://states/barrel/tumble_state.gd" id="8_iyxs0"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_tvcq3"]
 radius = 15.0
@@ -113,13 +113,13 @@ nodes/TimeScale/node = SubResource("AnimationNodeTimeScale_wyhcj")
 nodes/TimeScale/position = Vector2(120, 130)
 node_connections = [&"output", 0, &"TimeScale", &"TimeScale", 0, &"StateMachine"]
 
-[node name="Barrel" type="CharacterBody2D"]
+[node name="Barrel" type="CharacterBody2D" groups=["freezable"]]
 collision_layer = 16
 collision_mask = 2
-script = ExtResource("1_n7vin")
+script = ExtResource("1_4uqv0")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-texture = ExtResource("1_814dc")
+texture = ExtResource("2_e3jk2")
 hframes = 2
 vframes = 3
 frame = 3
@@ -167,26 +167,26 @@ target_position = Vector2(2.08165e-12, 3)
 collision_mask = 2
 
 [node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("anim_tree")]
-script = ExtResource("2_27a6e")
+script = ExtResource("3_fq25c")
 anim_tree = NodePath("../AnimationTree")
 anim_playback_path = &"parameters/StateMachine/playback"
 initial_state = NodePath("Freeze")
 
 [node name="Bounce" type="Node" parent="StateMachine"]
-script = ExtResource("3_654nl")
+script = ExtResource("4_g3hjp")
 
 [node name="Fall" type="Node" parent="StateMachine"]
-script = ExtResource("4_5umik")
+script = ExtResource("5_0fiut")
 
 [node name="Freeze" type="Node" parent="StateMachine"]
-script = ExtResource("5_h5cu4")
+script = ExtResource("6_knr1n")
 
 [node name="Roll" type="Node" parent="StateMachine" node_paths=PackedStringArray("platform_detectors", "ladder_top_checker")]
-script = ExtResource("3_kanbc")
+script = ExtResource("7_yrwof")
 platform_detectors = [NodePath("../../PlatformDetectorLeft"), NodePath("../../PlatformDetectorRight")]
 ladder_top_checker = NodePath("../../LadderTopChecker")
 
 [node name="Tumble" type="Node" parent="StateMachine" node_paths=PackedStringArray("ladder_bottom_checker", "platform_below_checker")]
-script = ExtResource("6_1d25j")
+script = ExtResource("8_iyxs0")
 ladder_bottom_checker = NodePath("../../LadderBottomChecker")
 platform_below_checker = NodePath("../../PlatformBelowChecker")
