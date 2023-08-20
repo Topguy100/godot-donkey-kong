@@ -101,12 +101,12 @@ states/Rolling/position = Vector2(370.94, 100.622)
 states/Tumbling/node = SubResource("AnimationNodeAnimation_iae1c")
 states/Tumbling/position = Vector2(570.483, 100.311)
 transitions = ["Start", "Rolling", SubResource("AnimationNodeStateMachineTransition_w7lih"), "Rolling", "Tumbling", SubResource("AnimationNodeStateMachineTransition_u0ewe"), "Tumbling", "Rolling", SubResource("AnimationNodeStateMachineTransition_mooyk")]
-graph_offset = Vector2(-432.745, -197.925)
+graph_offset = Vector2(-314.388, -60.6379)
 
 [sub_resource type="AnimationNodeTimeScale" id="AnimationNodeTimeScale_wyhcj"]
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_sane2"]
-graph_offset = Vector2(-433.92, -43)
+graph_offset = Vector2(-285.12, 0)
 nodes/StateMachine/node = SubResource("AnimationNodeStateMachine_c6shn")
 nodes/StateMachine/position = Vector2(-90, 130)
 nodes/TimeScale/node = SubResource("AnimationNodeTimeScale_wyhcj")

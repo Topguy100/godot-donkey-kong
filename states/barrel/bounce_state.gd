@@ -9,12 +9,12 @@ func enter(params: Dictionary = {}):
 
 func _process(_delta):
 	anim_tree.set("parameters/StateMachine/Rolling/blend_position", actor.velocity.x)
-	anim_tree.set("parameters/TimeScale/scale", actor.velocity.x / actor.SPEED)
+	anim_tree.set("parameters/TimeScale/scale", absf(actor.velocity.x / actor.SPEED))
 
 func _physics_process(delta):
 	actor.velocity.x = actor.direction * 0.6 * actor.SPEED
 	actor.velocity.y += gravity * delta
-	
+
 	actor.move_and_slide()
 
 	if actor.is_on_floor():

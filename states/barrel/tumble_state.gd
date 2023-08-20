@@ -19,9 +19,9 @@ func _process(_delta):
 
 func _physics_process(_delta):
 	actor.velocity = Vector2(0, actor.SPEED)
-	
+
 	actor.move_and_slide()
-	
+
 	if self.platform_below_checker.is_colliding() and self.ladder_bottom_checker.is_colliding():
 		transition_to.emit("Roll")
-	
+
