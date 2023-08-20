@@ -122,7 +122,7 @@ script = ExtResource("1_4uqv0")
 texture = ExtResource("2_e3jk2")
 hframes = 2
 vframes = 3
-frame = 3
+frame = 4
 
 [node name="CollisionShape" type="CollisionShape2D" parent="."]
 rotation = 1.5708

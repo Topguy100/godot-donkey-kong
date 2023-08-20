@@ -27,3 +27,9 @@ func _on_collision_area_body_exited(body):
 			print("Unimplemented: Create a FlameBall")
 
 		body.queue_free()
+
+	if body.name == "ExplosiveBarrel":
+		# Create a new flame ball
+		print("Unimplemented: Create a FlameBall")
+
+		body.queue_free()

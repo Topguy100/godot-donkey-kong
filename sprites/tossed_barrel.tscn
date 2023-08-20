@@ -1,0 +1,96 @@
+[gd_scene load_steps=12 format=3 uid="uid://byn5o7m7yug3k"]
+
+[ext_resource type="Script" path="res://sprites/tossed_barrel.gd" id="1_78x5p"]
+[ext_resource type="Texture2D" uid="uid://dm28dl4cnpksw" path="res://assets/objects/Explosive Barrel.png" id="2_eyfum"]
+
+[sub_resource type="Curve2D" id="Curve2D_qu65j"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 2.08165e-12, 2.08165e-12, 0, 0, 0, 0, 2.08165e-12, 117, 0, 0, 0, 0, 2.08165e-12, 105, 0, 0, 0, 0, 2.08165e-12, 189, 0, 0, 0, 0, 2.08165e-12, 177, 0, 0, 0, 0, 2.08165e-12, 315, 0, 0, 0, 0, 2.08165e-12, 303, 0, 0, 0, 0, 2.08165e-12, 387, 0, 0, 0, 0, 2.08165e-12, 375, 0, 0, 0, 0, 2.08165e-12, 501, 34.6482, 0.353553, -34.6482, -0.353553, -33, 477, 0, 0, 0, 0, -63, 501)
+}
+point_count = 12
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3vm2f"]
+atlas = ExtResource("2_eyfum")
+region = Rect2(0, 0, 48, 30)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_02tg7"]
+atlas = ExtResource("2_eyfum")
+region = Rect2(48, 0, 48, 30)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5rbub"]
+atlas = ExtResource("2_eyfum")
+region = Rect2(0, 30, 48, 30)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6vqqy"]
+atlas = ExtResource("2_eyfum")
+region = Rect2(48, 30, 48, 30)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_plwdr"]
+atlas = ExtResource("2_eyfum")
+region = Rect2(0, 60, 48, 30)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gcxgf"]
+atlas = ExtResource("2_eyfum")
+region = Rect2(48, 60, 48, 30)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_ef6rg"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3vm2f")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_02tg7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5rbub")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6vqqy")
+}],
+"loop": true,
+"name": &"roll_left",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_plwdr")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gcxgf")
+}],
+"loop": true,
+"name": &"tumble",
+"speed": 10.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_m8d8a"]
+radius = 15.0
+
+[node name="TossedBarrelPath" type="Path2D"]
+curve = SubResource("Curve2D_qu65j")
+
+[node name="TossedBarrel" type="PathFollow2D" parent="." groups=["freezable"]]
+position = Vector2(2.08165e-12, 2.08165e-12)
+rotates = false
+loop = false
+script = ExtResource("1_78x5p")
+
+[node name="RemoteTransform2D" type="RemoteTransform2D" parent="TossedBarrel"]
+remote_path = NodePath("../ExplosiveBarrel")
+
+[node name="ExplosiveBarrel" type="AnimatableBody2D" parent="TossedBarrel"]
+collision_layer = 16
+collision_mask = 0
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="TossedBarrel/ExplosiveBarrel"]
+sprite_frames = SubResource("SpriteFrames_ef6rg")
+animation = &"tumble"
+autoplay = "tumble"
+frame = 1
+frame_progress = 0.832698
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TossedBarrel/ExplosiveBarrel"]
+shape = SubResource("CircleShape2D_m8d8a")
+
+[connection signal="tree_exiting" from="TossedBarrel/ExplosiveBarrel" to="TossedBarrel" method="_on_explosive_barrel_tree_exiting"]

@@ -1,7 +1,7 @@
 class_name Barrel
 extends CharacterBody2D
 
-enum Type { REGULAR = 0, EXPLOSIVE }
+enum Type { UNSPECIFIED = 0, REGULAR, EXPLOSIVE }
 
 const SPEED = 175.0
 const TEXTURES = {
@@ -9,6 +9,7 @@ const TEXTURES = {
 	Type.EXPLOSIVE: preload("res://assets/objects/Explosive Barrel.png")
 }
 
+@export var type_override := Type.UNSPECIFIED
 @export var direction := 1
 @export var explosive_chance := 0.1
 @export var tumble_chance := 0.3
@@ -22,6 +23,9 @@ var unfrozen_state := "Roll"
 
 func _init():
 	type = Type.REGULAR if randf() > explosive_chance else Type.EXPLOSIVE
+
+	if type_override != Type.UNSPECIFIED:
+		type = type_override
 
 func _ready():
 	sprite.texture = TEXTURES[type]
