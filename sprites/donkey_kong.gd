@@ -26,7 +26,8 @@ func _on_timer_timeout():
 
 func freeze(freeze: bool):
 	if freeze:
-		throw_timer.stop()
-		anim_player.play("idle")
+		throw_timer.paused = true
+		anim_player.pause()
 	else:
-		throw_timer.start()
+		throw_timer.paused = false
+		anim_player.play()
