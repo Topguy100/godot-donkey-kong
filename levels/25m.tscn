@@ -10,10 +10,10 @@
 [ext_resource type="Texture2D" uid="uid://d35n2rd0jotgv" path="res://assets/objects/Barrel Stack.png" id="5_qmcuh"]
 [ext_resource type="Texture2D" uid="uid://hiehfqmvsmb2" path="res://assets/characters/Pauline.png" id="6_5a4d2"]
 [ext_resource type="Texture2D" uid="uid://bhmlw2vscmu2w" path="res://assets/objects/Help.png" id="7_ruggn"]
-[ext_resource type="Texture2D" uid="uid://bbj3i45e4l3bb" path="res://assets/objects/Oil Barrel.png" id="8_04diy"]
 [ext_resource type="Texture2D" uid="uid://br631lb6na5lh" path="res://assets/characters/FlameBall.png" id="9_oop6w"]
 [ext_resource type="Texture2D" uid="uid://d2l2xjdty1ci6" path="res://assets/objects/Heart.png" id="11_6iuid"]
 [ext_resource type="Texture2D" uid="uid://dcuy7hmqw505f" path="res://assets/objects/Hammer.png" id="11_v1nnb"]
+[ext_resource type="PackedScene" uid="uid://tocme2b462e1" path="res://sprites/oil_barrel.tscn" id="13_i4nfj"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_lf0yl"]
 texture = ExtResource("1_o3f3q")
@@ -909,12 +909,9 @@ hframes = 4
 
 [node name="Barrels" type="Node2D" parent="."]
 
-[node name="Oil Barrel" type="Sprite2D" parent="."]
+[node name="Oil Barrel" parent="." instance=ExtResource("13_i4nfj")]
 z_index = 10
 position = Vector2(72, 696)
-texture = ExtResource("8_04diy")
-hframes = 5
-frame = 3
 
 [node name="Mario" parent="." instance=ExtResource("2_3dq15")]
 z_index = 100

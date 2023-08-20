@@ -1,8 +1,7 @@
 extends Node2D
 
 @onready var mario = $Mario as Mario
-@onready var barrels_group = $Barrels as Node2D
-@onready var donkey_kong = $"Donkey Kong"
+@onready var oil_barrel = $"Oil Barrel" as Sprite2D
 
 func _ready():
 	mario.died.connect(mario_died)

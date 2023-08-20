@@ -561,7 +561,7 @@ states/Start/position = Vector2(243.525, 38)
 transitions = ["Start", "Idle", SubResource("AnimationNodeStateMachineTransition_1g3ei"), "Idle", "Run", SubResource("AnimationNodeStateMachineTransition_k1y6l"), "Run", "Idle", SubResource("AnimationNodeStateMachineTransition_3tdx2"), "End Climb", "Run", SubResource("AnimationNodeStateMachineTransition_sxasm"), "Idle", "Death", SubResource("AnimationNodeStateMachineTransition_thpkl"), "Death", "End", SubResource("AnimationNodeStateMachineTransition_hdsdf"), "Jump", "Skid", SubResource("AnimationNodeStateMachineTransition_j1n6r"), "Idle", "Jump", SubResource("AnimationNodeStateMachineTransition_j318c"), "Skid", "Idle", SubResource("AnimationNodeStateMachineTransition_jpvo8"), "Jump", "Idle", SubResource("AnimationNodeStateMachineTransition_mk40q"), "Idle", "Climb", SubResource("AnimationNodeStateMachineTransition_mhjhn"), "Climb", "Idle", SubResource("AnimationNodeStateMachineTransition_ehruc"), "Climb", "End Climb", SubResource("AnimationNodeStateMachineTransition_o751f"), "End Climb", "Climb", SubResource("AnimationNodeStateMachineTransition_kvjhf"), "Run", "Jump", SubResource("AnimationNodeStateMachineTransition_43goc"), "End Climb", "Jump", SubResource("AnimationNodeStateMachineTransition_mjitu"), "Run", "Climb", SubResource("AnimationNodeStateMachineTransition_rxfn4"), "Climb", "Run", SubResource("AnimationNodeStateMachineTransition_lcejr")]
 graph_offset = Vector2(-705.562, -173.895)
 
-[node name="Player" type="CharacterBody2D"]
+[node name="Mario" type="CharacterBody2D"]
 collision_mask = 130
 script = ExtResource("1_h6gh8")
 

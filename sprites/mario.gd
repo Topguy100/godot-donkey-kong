@@ -19,18 +19,18 @@ func transition_via_inputs():
 	if not Input.is_anything_pressed():
 		state_machine.transition_to("Idle")
 		return
-	
+
 	# Check for attempts to jump
 	if Input.is_action_just_pressed("jump"):
 		state_machine.transition_to("Jump")
 		return
-	
+
 	# Check for attempts to run
 	var x_axis = Input.get_axis("ui_left", "ui_right")
 	if x_axis:
 		state_machine.transition_to("Run")
 		return
-	
+
 	# Check for attempts to climb
 	var y_axis = Input.get_axis("ui_up", "ui_down")
 	if y_axis == -1 and ladder_bottom_checker.is_colliding():
@@ -51,8 +51,10 @@ func move_to_centre_of_ladder(checker: RayCast2D):
 	var tile_coord = tile_map.get_coords_for_body_rid(rid)
 	position.x = (tile_coord.x + 0.5) * tile_map.tile_set.tile_size.x + tile_map.position.x
 
-
-func _on_enemy_collision(_body):
+func kill():
 	state_machine.transition_to("Death")
 	anim_playback.travel("Death")
 	died.emit()
+
+func _on_enemy_collision(_body):
+	kill()

@@ -24,8 +24,8 @@ func launch_barrel():
 func _on_timer_timeout():
 	throw_barrel()
 
-func freeze(freeze: bool):
-	if freeze:
+func freeze(should_freeze: bool):
+	if should_freeze:
 		throw_timer.paused = true
 		anim_player.pause()
 	else:

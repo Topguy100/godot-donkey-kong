@@ -27,8 +27,8 @@ func _ready():
 	sprite.texture = TEXTURES[type]
 	anim_tree.active = true
 
-func freeze(freeze: bool):
-	if freeze:
+func freeze(should_freeze: bool):
+	if should_freeze:
 		unfrozen_state = state_machine.state.name
 		state_machine.transition_to("Freeze")
 	else:
