@@ -1,7 +1,5 @@
 extends Sprite2D
 
-signal did_ignite()
-
 @onready var anim_player = $AnimationPlayer as AnimationPlayer
 @onready var ignite_timer = $IgniteTimer as Timer
 
@@ -11,7 +9,6 @@ func ignite():
 
 	anim_player.play("ignite")
 	ignite_timer.start()
-	did_ignite.emit()
 
 func _on_ignite_timer_timeout():
 	anim_player.play("burn")
@@ -23,13 +20,14 @@ func _on_collision_area_body_entered(body):
 func _on_collision_area_body_exited(body):
 	if body is Barrel:
 		if body.type == Barrel.Type.EXPLOSIVE:
-			# Create a new flame ball
-			print("Unimplemented: Create a FlameBall")
-
+			_create_flameball()
 		body.queue_free()
 
 	if body.name == "ExplosiveBarrel":
-		# Create a new flame ball
-		print("Unimplemented: Create a FlameBall")
-
+		_create_flameball()
 		body.queue_free()
+
+func _create_flameball():
+	# Create a new flame ball
+	print("Unimplemented: Create a FlameBall")
+	ignite()

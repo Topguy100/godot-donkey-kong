@@ -1,9 +1,12 @@
-[gd_scene load_steps=62 format=3 uid="uid://chadcflauv6ap"]
+[gd_scene load_steps=65 format=3 uid="uid://chadcflauv6ap"]
 
 [ext_resource type="Texture2D" uid="uid://idelqjnu7633" path="res://assets/characters/Mario.png" id="1_27e4p"]
 [ext_resource type="Script" path="res://sprites/mario.gd" id="1_h6gh8"]
 [ext_resource type="Script" path="res://states/state_machine.gd" id="2_h01ru"]
+[ext_resource type="AudioStream" uid="uid://mygjnehliphc" path="res://assets/audio/MarioJump.mp3" id="2_jgl5o"]
+[ext_resource type="AudioStream" uid="uid://cpmd6iydlbggx" path="res://assets/audio/MarioDeath.mp3" id="3_34pvl"]
 [ext_resource type="Script" path="res://states/mario/climb_state.gd" id="4_5vjpb"]
+[ext_resource type="AudioStream" uid="uid://dvuhvnsewyhya" path="res://assets/audio/Running.mp3" id="4_l6wu1"]
 [ext_resource type="Script" path="res://states/mario/death_state.gd" id="5_52xts"]
 [ext_resource type="Script" path="res://states/mario/idle_state.gd" id="6_w6l7k"]
 [ext_resource type="Script" path="res://states/mario/jump_state.gd" id="7_330gi"]
@@ -64,8 +67,8 @@ tracks/0/keys = {
 
 [sub_resource type="Animation" id="Animation_uk7bh"]
 resource_name = "death_left"
-length = 1.5
-step = 0.15
+length = 4.4
+step = 0.21
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -73,7 +76,7 @@ tracks/0/path = NodePath(".:frame")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.15, 0.3, 0.45, 0.6, 0.75, 0.9, 1.05, 1.2, 1.35),
+"times": PackedFloat32Array(0, 1.26, 1.47, 1.68, 1.89, 2.1, 2.31, 2.52, 2.73, 2.94),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
 "update": 1,
 "values": [15, 16, 15, 16, 15, 16, 15, 16, 15, 17]
@@ -85,7 +88,7 @@ tracks/1/path = NodePath(".:flip_h")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.3, 0.6, 0.9, 1.2),
+"times": PackedFloat32Array(0, 1.47, 1.89, 2.31, 2.73),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1),
 "update": 1,
 "values": [true, false, true, false, true]
@@ -97,16 +100,28 @@ tracks/2/path = NodePath(".:flip_v")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
-"times": PackedFloat32Array(0, 0.3, 0.6, 0.9, 1.2),
+"times": PackedFloat32Array(0, 1.47, 1.89, 2.31, 2.8),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1),
 "update": 1,
 "values": [false, true, false, true, false]
 }
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("../Audio/Mario Death:playing")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [true]
+}
 
 [sub_resource type="Animation" id="Animation_bl034"]
 resource_name = "death_right"
-length = 1.5
-step = 0.15
+length = 4.4
+step = 0.21
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -114,7 +129,7 @@ tracks/0/path = NodePath(".:frame")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.15, 0.3, 0.45, 0.6, 0.75, 0.9, 1.05, 1.2, 1.35),
+"times": PackedFloat32Array(0, 1.26, 1.47, 1.68, 1.89, 2.1, 2.31, 2.52, 2.73, 2.94),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
 "update": 1,
 "values": [15, 16, 15, 16, 15, 16, 15, 16, 15, 17]
@@ -126,7 +141,7 @@ tracks/1/path = NodePath(".:flip_h")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.3, 0.6, 0.9, 1.2),
+"times": PackedFloat32Array(0, 1.47, 1.89, 2.31, 2.73),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1),
 "update": 1,
 "values": [false, true, false, true, false]
@@ -138,10 +153,22 @@ tracks/2/path = NodePath(".:flip_v")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
-"times": PackedFloat32Array(0, 0.3, 0.6, 0.9, 1.2),
+"times": PackedFloat32Array(0, 1.47, 1.89, 2.31, 2.73),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1),
 "update": 1,
 "values": [false, true, false, true, false]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("../Audio/Mario Death:playing")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [true]
 }
 
 [sub_resource type="Animation" id="Animation_fuxan"]
@@ -283,6 +310,18 @@ tracks/1/keys = {
 "update": 1,
 "values": [false]
 }
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("../Audio/Mario Jump:playing")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [true]
+}
 
 [sub_resource type="Animation" id="Animation_fd5f4"]
 resource_name = "jump_right"
@@ -306,6 +345,18 @@ tracks/1/path = NodePath(".:flip_h")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [true]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("../Audio/Mario Jump:playing")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 1,
@@ -559,11 +610,23 @@ states/Skid/node = SubResource("AnimationNodeBlendSpace1D_hjdp6")
 states/Skid/position = Vector2(447.605, 250.245)
 states/Start/position = Vector2(243.525, 38)
 transitions = ["Start", "Idle", SubResource("AnimationNodeStateMachineTransition_1g3ei"), "Idle", "Run", SubResource("AnimationNodeStateMachineTransition_k1y6l"), "Run", "Idle", SubResource("AnimationNodeStateMachineTransition_3tdx2"), "End Climb", "Run", SubResource("AnimationNodeStateMachineTransition_sxasm"), "Idle", "Death", SubResource("AnimationNodeStateMachineTransition_thpkl"), "Death", "End", SubResource("AnimationNodeStateMachineTransition_hdsdf"), "Jump", "Skid", SubResource("AnimationNodeStateMachineTransition_j1n6r"), "Idle", "Jump", SubResource("AnimationNodeStateMachineTransition_j318c"), "Skid", "Idle", SubResource("AnimationNodeStateMachineTransition_jpvo8"), "Jump", "Idle", SubResource("AnimationNodeStateMachineTransition_mk40q"), "Idle", "Climb", SubResource("AnimationNodeStateMachineTransition_mhjhn"), "Climb", "Idle", SubResource("AnimationNodeStateMachineTransition_ehruc"), "Climb", "End Climb", SubResource("AnimationNodeStateMachineTransition_o751f"), "End Climb", "Climb", SubResource("AnimationNodeStateMachineTransition_kvjhf"), "Run", "Jump", SubResource("AnimationNodeStateMachineTransition_43goc"), "End Climb", "Jump", SubResource("AnimationNodeStateMachineTransition_mjitu"), "Run", "Climb", SubResource("AnimationNodeStateMachineTransition_rxfn4"), "Climb", "Run", SubResource("AnimationNodeStateMachineTransition_lcejr")]
-graph_offset = Vector2(-705.562, -173.895)
+graph_offset = Vector2(-889.583, -25.815)
 
 [node name="Mario" type="CharacterBody2D"]
 collision_mask = 130
 script = ExtResource("1_h6gh8")
+
+[node name="Audio" type="Node" parent="."]
+
+[node name="Mario Jump" type="AudioStreamPlayer" parent="Audio"]
+stream = ExtResource("2_jgl5o")
+volume_db = -12.0
+
+[node name="Mario Death" type="AudioStreamPlayer" parent="Audio"]
+stream = ExtResource("3_34pvl")
+
+[node name="Mario Running" type="AudioStreamPlayer" parent="Audio"]
+stream = ExtResource("4_l6wu1")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CapsuleShape2D_xsfub")
@@ -611,7 +674,7 @@ parameters/Climb/TimeScale/scale = 1.0
 parameters/Death/blend_position = 1.0
 parameters/Idle/blend_position = 1.0
 parameters/Jump/blend_position = 1.0
-parameters/Run/blend_position = 1.0
+parameters/Run/blend_position = 0.997026
 parameters/Skid/blend_position = 1.0
 
 [node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("anim_tree")]
@@ -635,7 +698,8 @@ script = ExtResource("6_w6l7k")
 [node name="Jump" type="Node" parent="StateMachine"]
 script = ExtResource("7_330gi")
 
-[node name="Run" type="Node" parent="StateMachine"]
+[node name="Run" type="Node" parent="StateMachine" node_paths=PackedStringArray("running_audio_player")]
 script = ExtResource("8_hv0pb")
+running_audio_player = NodePath("../../Audio/Mario Running")
 
 [connection signal="body_entered" from="EnemyCollisionArea" to="." method="_on_enemy_collision"]

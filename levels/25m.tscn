@@ -1,10 +1,11 @@
-[gd_scene load_steps=19 format=3 uid="uid://b1ym76c3eelpf"]
+[gd_scene load_steps=20 format=3 uid="uid://b1ym76c3eelpf"]
 
 [ext_resource type="Script" path="res://levels/25m.gd" id="1_ipvdn"]
 [ext_resource type="Texture2D" uid="uid://3j8rqyyg3fvm" path="res://assets/tiles/interface.png" id="1_o3f3q"]
 [ext_resource type="PackedScene" uid="uid://chadcflauv6ap" path="res://sprites/mario.tscn" id="2_3dq15"]
 [ext_resource type="PackedScene" uid="uid://bhkhhghga17u3" path="res://interface/numbers.tscn" id="2_8cpe2"]
 [ext_resource type="Texture2D" uid="uid://clxb4a3i1mmsw" path="res://assets/tiles/platforms-pink.png" id="2_m8s2f"]
+[ext_resource type="AudioStream" uid="uid://dpk2i5ybtxpvs" path="res://assets/audio/BackgroundRiff.mp3" id="2_mtc4c"]
 [ext_resource type="PackedScene" uid="uid://c61xlueu1agd" path="res://interface/lives.tscn" id="3_jaive"]
 [ext_resource type="PackedScene" uid="uid://c65mp7opiaw83" path="res://sprites/donkey_kong.tscn" id="5_o4rb1"]
 [ext_resource type="Texture2D" uid="uid://d35n2rd0jotgv" path="res://assets/objects/Barrel Stack.png" id="5_qmcuh"]
@@ -821,6 +822,13 @@ sources/1 = SubResource("TileSetAtlasSource_1hhh5")
 [node name="25M" type="Node2D"]
 position = Vector2(4, 4)
 script = ExtResource("1_ipvdn")
+
+[node name="Audio" type="Node" parent="."]
+
+[node name="Background Music" type="AudioStreamPlayer" parent="Audio"]
+stream = ExtResource("2_mtc4c")
+pitch_scale = 1.4
+autoplay = true
 
 [node name="Interface" type="Node2D" parent="."]
 

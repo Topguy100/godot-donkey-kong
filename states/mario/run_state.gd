@@ -2,10 +2,17 @@ extends MarioState
 
 const SPEED = 130.0
 
+@export var running_audio_player : AudioStreamPlayer
+
 var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 
 func enter(params: Dictionary = {}):
 	super.enter(params)
+	running_audio_player.play()
+
+func exit():
+	super.exit()
+	running_audio_player.stop()
 
 func _process(_delta):
 	var x_axis = Input.get_axis("ui_left", "ui_right")
