@@ -1,6 +1,6 @@
 extends MarioState
 
-const SPEED = 130.0
+const SPEED = 90.0
 
 @export var running_audio_player : AudioStreamPlayer
 

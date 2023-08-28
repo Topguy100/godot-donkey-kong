@@ -1,6 +1,6 @@
 extends MarioState
 
-const JUMP_VELOCITY = -290.0
+const JUMP_VELOCITY = -310.0
 
 var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 var should_skid := false
@@ -8,6 +8,7 @@ var should_skid := false
 func enter(params: Dictionary = {}):
 	super.enter(params)
 	should_skid = mario.velocity.x != 0
+	mario.velocity.x *= 0.8
 	mario.velocity.y = JUMP_VELOCITY
 
 func _physics_process(delta):

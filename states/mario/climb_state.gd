@@ -1,6 +1,6 @@
 extends MarioState
 
-const SPEED = 130.0
+const SPEED = 90.0
 
 @export var platform_checker: RayCast2D
 @export var ladder_top_checker: RayCast2D
