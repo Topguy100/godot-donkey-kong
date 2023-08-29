@@ -1,4 +1,4 @@
-[gd_scene load_steps=65 format=3 uid="uid://chadcflauv6ap"]
+[gd_scene load_steps=66 format=3 uid="uid://chadcflauv6ap"]
 
 [ext_resource type="Texture2D" uid="uid://idelqjnu7633" path="res://assets/characters/Mario.png" id="1_27e4p"]
 [ext_resource type="Script" path="res://sprites/mario.gd" id="1_h6gh8"]
@@ -7,6 +7,7 @@
 [ext_resource type="AudioStream" uid="uid://cpmd6iydlbggx" path="res://assets/audio/MarioDeath.mp3" id="3_34pvl"]
 [ext_resource type="Script" path="res://states/mario/climb_state.gd" id="4_5vjpb"]
 [ext_resource type="AudioStream" uid="uid://dvuhvnsewyhya" path="res://assets/audio/Running.mp3" id="4_l6wu1"]
+[ext_resource type="AudioStream" uid="uid://cn7s258uw6o15" path="res://assets/audio/Climbing.mp3" id="5_2xom3"]
 [ext_resource type="Script" path="res://states/mario/death_state.gd" id="5_52xts"]
 [ext_resource type="Script" path="res://states/mario/idle_state.gd" id="6_w6l7k"]
 [ext_resource type="Script" path="res://states/mario/jump_state.gd" id="7_330gi"]
@@ -626,6 +627,9 @@ stream = ExtResource("3_34pvl")
 [node name="Mario Running" type="AudioStreamPlayer" parent="Audio"]
 stream = ExtResource("4_l6wu1")
 
+[node name="Mario Climbing" type="AudioStreamPlayer" parent="Audio"]
+stream = ExtResource("5_2xom3")
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, 9)
 shape = SubResource("CapsuleShape2D_xsfub")
@@ -681,11 +685,12 @@ anim_tree = NodePath("../AnimationTree")
 anim_playback_path = &"parameters/playback"
 initial_state = NodePath("Idle")
 
-[node name="Climb" type="Node" parent="StateMachine" node_paths=PackedStringArray("platform_checker", "ladder_top_checker", "ladder_bottom_checker")]
+[node name="Climb" type="Node" parent="StateMachine" node_paths=PackedStringArray("platform_checker", "ladder_top_checker", "ladder_bottom_checker", "climbing_audio_player")]
 script = ExtResource("4_5vjpb")
 platform_checker = NodePath("../../PlatformBelowChecker")
 ladder_top_checker = NodePath("../../LadderTopChecker")
 ladder_bottom_checker = NodePath("../../LadderBottomChecker")
+climbing_audio_player = NodePath("../../Audio/Mario Climbing")
 
 [node name="Death" type="Node" parent="StateMachine"]
 script = ExtResource("5_52xts")

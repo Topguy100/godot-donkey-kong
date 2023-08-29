@@ -5,11 +5,13 @@ const SPEED = 90.0
 @export var platform_checker: RayCast2D
 @export var ladder_top_checker: RayCast2D
 @export var ladder_bottom_checker: RayCast2D
+@export var climbing_audio_player : AudioStreamPlayer
 
 var at_end_of_ladder := false
 
 func enter(params: Dictionary = {}):
 	super.enter(params)
+	climbing_audio_player.play()
 
 	# Stop checking for platform collisions while climbing
 	mario.set_collision_mask_value(2, false)
@@ -19,6 +21,7 @@ func enter(params: Dictionary = {}):
 
 func exit():
 	super.exit()
+	climbing_audio_player.stop()
 
 	# Resume checking for platform collisions
 	mario.set_collision_mask_value(2, true)
@@ -38,8 +41,10 @@ func _physics_process(_delta):
 		(y_axis == 1 and not ladder_bottom_checker.is_colliding())
 	):
 		mario.velocity.y = y_axis * SPEED
+		climbing_audio_player.stream_paused = false
 	else:
 		mario.velocity.y = 0
+		climbing_audio_player.stream_paused = true
 
 	mario.move_and_slide()
 
