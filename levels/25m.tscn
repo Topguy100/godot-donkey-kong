@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://b1ym76c3eelpf"]
+[gd_scene load_steps=18 format=3 uid="uid://b1ym76c3eelpf"]
 
 [ext_resource type="Script" path="res://levels/25m.gd" id="1_ipvdn"]
 [ext_resource type="Texture2D" uid="uid://3j8rqyyg3fvm" path="res://assets/tiles/interface.png" id="1_o3f3q"]
@@ -9,10 +9,8 @@
 [ext_resource type="PackedScene" uid="uid://c61xlueu1agd" path="res://interface/lives.tscn" id="3_jaive"]
 [ext_resource type="PackedScene" uid="uid://c65mp7opiaw83" path="res://sprites/donkey_kong.tscn" id="5_o4rb1"]
 [ext_resource type="Texture2D" uid="uid://d35n2rd0jotgv" path="res://assets/objects/Barrel Stack.png" id="5_qmcuh"]
-[ext_resource type="Texture2D" uid="uid://hiehfqmvsmb2" path="res://assets/characters/Pauline.png" id="6_5a4d2"]
-[ext_resource type="Texture2D" uid="uid://bhmlw2vscmu2w" path="res://assets/objects/Help.png" id="7_ruggn"]
+[ext_resource type="PackedScene" uid="uid://tja3ggym0u1g" path="res://sprites/pauline.tscn" id="8_b7kip"]
 [ext_resource type="Texture2D" uid="uid://br631lb6na5lh" path="res://assets/characters/FlameBall.png" id="9_oop6w"]
-[ext_resource type="Texture2D" uid="uid://d2l2xjdty1ci6" path="res://assets/objects/Heart.png" id="11_6iuid"]
 [ext_resource type="Texture2D" uid="uid://dcuy7hmqw505f" path="res://assets/objects/Hammer.png" id="11_v1nnb"]
 [ext_resource type="PackedScene" uid="uid://tocme2b462e1" path="res://sprites/oil_barrel.tscn" id="13_i4nfj"]
 
@@ -874,25 +872,8 @@ layer_0/tile_data = PackedInt32Array(524296, 1, 2, 589832, 1, 2, 655369, 262145,
 position = Vector2(30, 204)
 texture = ExtResource("5_qmcuh")
 
-[node name="Pauline" type="Sprite2D" parent="."]
+[node name="Pauline" parent="." instance=ExtResource("8_b7kip")]
 position = Vector2(288, 135)
-texture = ExtResource("6_5a4d2")
-hframes = 3
-frame = 1
-
-[node name="Help" type="Sprite2D" parent="Pauline"]
-visible = false
-position = Vector2(60, -27)
-texture = ExtResource("7_ruggn")
-hframes = 2
-vframes = 3
-frame = 2
-
-[node name="Heart" type="Sprite2D" parent="Pauline"]
-visible = false
-position = Vector2(51, -39)
-texture = ExtResource("11_6iuid")
-hframes = 2
 
 [node name="Flame Ball" type="Sprite2D" parent="."]
 position = Vector2(21, 720)

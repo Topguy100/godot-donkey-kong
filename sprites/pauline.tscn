@@ -1,0 +1,100 @@
+[gd_scene load_steps=8 format=3 uid="uid://tja3ggym0u1g"]
+
+[ext_resource type="Texture2D" uid="uid://hiehfqmvsmb2" path="res://assets/characters/Pauline.png" id="1_bbcuw"]
+[ext_resource type="Script" path="res://sprites/pauline.gd" id="2_0dawg"]
+[ext_resource type="Texture2D" uid="uid://bhmlw2vscmu2w" path="res://assets/objects/Help.png" id="2_gw4b3"]
+[ext_resource type="Texture2D" uid="uid://d2l2xjdty1ci6" path="res://assets/objects/Heart.png" id="3_5cnew"]
+
+[sub_resource type="Animation" id="Animation_1o0bc"]
+resource_name = "call_for_help"
+length = 1.8
+step = 0.2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.2, 0.4, 0.6, 0.8, 1, 1.2, 1.4, 1.6),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [1, 0, 1, 0, 1, 0, 1, 0, 1]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Help:visible")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [true]
+}
+
+[sub_resource type="Animation" id="Animation_0bnps"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [1]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Help:visible")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [false]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_tlus1"]
+_data = {
+"RESET": SubResource("Animation_0bnps"),
+"call_for_help": SubResource("Animation_1o0bc")
+}
+
+[node name="Pauline" type="Sprite2D" groups=["freezable"]]
+position = Vector2(2.08165e-12, 2.08165e-12)
+texture = ExtResource("1_bbcuw")
+hframes = 3
+frame = 1
+script = ExtResource("2_0dawg")
+
+[node name="Help" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(60, -27)
+texture = ExtResource("2_gw4b3")
+hframes = 2
+vframes = 3
+frame = 2
+
+[node name="Heart" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(51, -39)
+texture = ExtResource("3_5cnew")
+hframes = 2
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_tlus1")
+}
+
+[node name="Call For Help Timer" type="Timer" parent="."]
+wait_time = 5.0
+autostart = true
+
+[connection signal="timeout" from="Call For Help Timer" to="." method="_on_call_for_help_timer_timeout"]

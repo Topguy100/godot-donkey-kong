@@ -17,7 +17,7 @@
 radius = 15.0
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_imyed"]
-height = 42.0
+height = 36.0
 
 [sub_resource type="Animation" id="Animation_bmmu7"]
 resource_name = "climb"
@@ -639,6 +639,7 @@ collision_layer = 0
 collision_mask = 16
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyCollisionArea"]
+position = Vector2(0, 3)
 shape = SubResource("CapsuleShape2D_imyed")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
