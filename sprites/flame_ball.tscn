@@ -167,7 +167,8 @@ position = Vector2(-3, -15)
 sprite_frames = SubResource("SpriteFrames_ba4we")
 animation = &"flicker"
 autoplay = "flicker"
-frame_progress = 0.978702
+frame = 1
+frame_progress = 0.66866
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Initial Path/Path Follow/Static Body"]
 position = Vector2(2.08165e-12, -6)
