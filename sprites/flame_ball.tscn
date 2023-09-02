@@ -1,20 +1,181 @@
-[gd_scene load_steps=4 format=3 uid="uid://oa8uv13pwbe5"]
+[gd_scene load_steps=13 format=3 uid="uid://oa8uv13pwbe5"]
 
 [ext_resource type="Script" path="res://sprites/flame_ball.gd" id="1_1buyy"]
 [ext_resource type="Texture2D" uid="uid://br631lb6na5lh" path="res://assets/characters/FlameBall.png" id="1_urm6t"]
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_4wdf1"]
-radius = 4.0
+[sub_resource type="Curve2D" id="Curve2D_ddlli"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 0, 0, -21.2132, -4.59619, 24.4636, 5.30044, 33, -18, 0, 0, 0, 0, 60, 36)
+}
+point_count = 3
 
-[node name="Flame Ball" type="StaticBody2D"]
-collision_layer = 16
-collision_mask = 0
+[sub_resource type="AtlasTexture" id="AtlasTexture_evb37"]
+atlas = ExtResource("1_urm6t")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_su3a2"]
+atlas = ExtResource("1_urm6t")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_w2ic3"]
+atlas = ExtResource("1_urm6t")
+region = Rect2(96, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m2ax7"]
+atlas = ExtResource("1_urm6t")
+region = Rect2(144, 0, 48, 48)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_ba4we"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_evb37")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_su3a2")
+}],
+"loop": true,
+"name": &"flicker",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_w2ic3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_m2ax7")
+}],
+"loop": true,
+"name": &"vulnerable",
+"speed": 10.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_4wdf1"]
+radius = 12.0
+
+[sub_resource type="Animation" id="Animation_jj3wa"]
+resource_name = "bounce_right"
+length = 0.8
+loop_mode = 1
+step = 0.2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("AnimatedSprite2D:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.2),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [Vector2(-3, -12), Vector2(-3, -15)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("AnimatedSprite2D:flip_h")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [false]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("CollisionShape2D:position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.2),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [Vector2(0, -3), Vector2(2.08165e-12, -6)]
+}
+
+[sub_resource type="Animation" id="Animation_w25r5"]
+resource_name = "bounce_left"
+length = 0.8
+loop_mode = 1
+step = 0.2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("AnimatedSprite2D:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.2),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [Vector2(3, -12), Vector2(3, -15)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("AnimatedSprite2D:flip_h")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [true]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("CollisionShape2D:position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.2),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [Vector2(0, -3), Vector2(2.08165e-12, -6)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_24mi1"]
+_data = {
+"bounce_left": SubResource("Animation_w25r5"),
+"bounce_right": SubResource("Animation_jj3wa")
+}
+
+[node name="Flame Ball" type="Node2D"]
 script = ExtResource("1_1buyy")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
-position = Vector2(0, -9)
-texture = ExtResource("1_urm6t")
-hframes = 4
+[node name="Initial Path" type="Path2D" parent="."]
+position = Vector2(-60, -36)
+curve = SubResource("Curve2D_ddlli")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="Path Follow" type="PathFollow2D" parent="Initial Path"]
+rotation = -0.499347
+rotates = false
+cubic_interp = false
+loop = false
+
+[node name="Static Body" type="StaticBody2D" parent="Initial Path/Path Follow"]
+position = Vector2(0, 3.8147e-06)
+rotation = 0.499347
+collision_layer = 16
+collision_mask = 0
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Initial Path/Path Follow/Static Body"]
+position = Vector2(-3, -15)
+sprite_frames = SubResource("SpriteFrames_ba4we")
+animation = &"flicker"
+autoplay = "flicker"
+frame_progress = 0.978702
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Initial Path/Path Follow/Static Body"]
+position = Vector2(2.08165e-12, -6)
 shape = SubResource("CircleShape2D_4wdf1")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Initial Path/Path Follow/Static Body"]
+libraries = {
+"": SubResource("AnimationLibrary_24mi1")
+}
+
+[node name="NavigationAgent2D" type="NavigationAgent2D" parent="."]

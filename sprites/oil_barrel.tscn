@@ -85,6 +85,9 @@ collision_mask = 17
 position = Vector2(19.5, 0)
 shape = SubResource("RectangleShape2D_xeu31")
 
+[node name="Flame Ball Spawn Location" type="Marker2D" parent="."]
+position = Vector2(60, 36)
+
 [connection signal="timeout" from="IgniteTimer" to="." method="_on_ignite_timer_timeout"]
 [connection signal="body_entered" from="CollisionArea" to="." method="_on_collision_area_body_entered"]
 [connection signal="body_exited" from="CollisionArea" to="." method="_on_collision_area_body_exited"]

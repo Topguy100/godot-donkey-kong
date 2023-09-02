@@ -1,11 +1,22 @@
-extends StaticBody2D
+extends Node2D
 
+@export var speed = 100
 
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	pass # Replace with function body.
+@onready var path_follow = $"Initial Path/Path Follow"
 
+enum State {
+	LEAP,
+	FOLLOW_PATH,
+}
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
+var _state = State.LEAP
+
+func _physics_process(delta):
+	match _state:
+		State.LEAP:
+			path_follow.progress += speed * delta
+			if path_follow.progress_ratio == 1:
+				z_index = 20
+				_state = State.FOLLOW_PATH
+		State.FOLLOW_PATH:
+			pass
