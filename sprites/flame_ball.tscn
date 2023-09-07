@@ -103,7 +103,7 @@ step = 0.2
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("AnimatedSprite2D:position")
+tracks/0/path = NodePath("../AnimatableBody2D/AnimatedSprite2D:position")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
@@ -115,7 +115,7 @@ tracks/0/keys = {
 tracks/1/type = "value"
 tracks/1/imported = false
 tracks/1/enabled = true
-tracks/1/path = NodePath("AnimatedSprite2D:flip_h")
+tracks/1/path = NodePath("../AnimatableBody2D/AnimatedSprite2D:flip_h")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
@@ -127,7 +127,7 @@ tracks/1/keys = {
 tracks/2/type = "value"
 tracks/2/imported = false
 tracks/2/enabled = true
-tracks/2/path = NodePath("CollisionShape2D:position")
+tracks/2/path = NodePath("../AnimatableBody2D/CollisionShape2D:position")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
@@ -143,7 +143,7 @@ _data = {
 "bounce_right": SubResource("Animation_jj3wa")
 }
 
-[node name="Flame Ball" type="Node2D"]
+[node name="Flame Ball" type="Node2D" groups=["freezable"]]
 script = ExtResource("1_1buyy")
 
 [node name="Initial Path" type="Path2D" parent="."]
@@ -151,32 +151,41 @@ position = Vector2(-60, -36)
 curve = SubResource("Curve2D_ddlli")
 
 [node name="Path Follow" type="PathFollow2D" parent="Initial Path"]
-rotation = -0.499347
 rotates = false
 cubic_interp = false
 loop = false
 
-[node name="Static Body" type="StaticBody2D" parent="Initial Path/Path Follow"]
-position = Vector2(0, 3.8147e-06)
-rotation = 0.499347
+[node name="AnimatableBody2D" type="AnimatableBody2D" parent="Initial Path/Path Follow"]
+scale = Vector2(1, 1)
 collision_layer = 16
 collision_mask = 0
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Initial Path/Path Follow/Static Body"]
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Initial Path/Path Follow/AnimatableBody2D"]
 position = Vector2(-3, -15)
+scale = Vector2(1, 1)
 sprite_frames = SubResource("SpriteFrames_ba4we")
 animation = &"flicker"
 autoplay = "flicker"
 frame = 1
 frame_progress = 0.66866
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Initial Path/Path Follow/Static Body"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Initial Path/Path Follow/AnimatableBody2D"]
 position = Vector2(2.08165e-12, -6)
+rotation = 0.499347
+scale = Vector2(1, 1)
 shape = SubResource("CircleShape2D_4wdf1")
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="Initial Path/Path Follow/Static Body"]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Initial Path/Path Follow/AnimatableBody2D"]
 libraries = {
 "": SubResource("AnimationLibrary_24mi1")
 }
 
 [node name="NavigationAgent2D" type="NavigationAgent2D" parent="."]
+path_desired_distance = 5.0
+path_postprocessing = 1
+
+[node name="RefreshTargetTimer" type="Timer" parent="."]
+wait_time = 10.0
+one_shot = true
+
+[connection signal="timeout" from="RefreshTargetTimer" to="." method="_on_refresh_target_timer_timeout"]

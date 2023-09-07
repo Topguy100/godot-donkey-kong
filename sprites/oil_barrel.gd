@@ -7,6 +7,7 @@ var flame_ball_scene = preload("res://sprites/flame_ball.tscn")
 @onready var flame_ball_spawn_location = $"Flame Ball Spawn Location" as Marker2D
 
 @export var flame_ball_parent: Node
+@export var flame_ball_target: Node2D
 
 func ignite():
 	if anim_player.current_animation == "ignite":
@@ -36,5 +37,6 @@ func _create_flame_ball():
 	# Create a new flame ball
 	var flame_ball = flame_ball_scene.instantiate() as Node2D
 	flame_ball.global_position = flame_ball_spawn_location.global_position
+	flame_ball.target_node = flame_ball_target
 	flame_ball_parent.add_child(flame_ball)
 	ignite()

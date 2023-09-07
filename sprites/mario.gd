@@ -11,7 +11,6 @@ signal died
 @onready var anim_playback = anim_tree["parameters/playback"] as AnimationNodeStateMachinePlayback
 
 func _ready():
-	queue_free()
 	for state in state_machine.states as Array[MarioState]:
 		state.ready_for_state_change.connect(transition_via_inputs)
 

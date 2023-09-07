@@ -1296,10 +1296,11 @@ hframes = 4
 
 [node name="Barrels" type="Node2D" parent="."]
 
-[node name="Oil Barrel" parent="." node_paths=PackedStringArray("flame_ball_parent") instance=ExtResource("13_i4nfj")]
+[node name="Oil Barrel" parent="." node_paths=PackedStringArray("flame_ball_parent", "flame_ball_target") instance=ExtResource("13_i4nfj")]
 z_index = 10
 position = Vector2(72, 696)
 flame_ball_parent = NodePath("../Flame Balls")
+flame_ball_target = NodePath("../Mario")
 
 [node name="Flame Balls" type="Node2D" parent="."]
 
