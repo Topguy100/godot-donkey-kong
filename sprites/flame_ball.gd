@@ -35,6 +35,10 @@ func _physics_process(delta):
 			var next_dir = to_local(
 				navigation_agent.get_next_path_position()
 			).normalized()
+			if next_dir.x > 0:
+				anim_player.play("bounce_right")
+			else:
+				anim_player.play("bounce_left")
 			global_position = global_position.move_toward(
 				global_position + next_dir,
 				navigate_speed * delta
