@@ -65,15 +65,15 @@ func _create_flame_ball():
 	var flame_ball = flame_ball_scene.instantiate() as Node2D
 	flame_ball.target_node = flame_ball_target
 	path_follow.add_child(flame_ball)
-	initial_path.add_child(path_follow)
+	initial_path.add_child.bind(path_follow).call_deferred()
 
 func _release_flame_ball(path_follow: PathFollow2D):
 	# Move the flame ball to its navigational parent
 	var flame_ball = path_follow.get_child(0) as Node2D
-	var position = flame_ball.global_position
+	var fbgp = flame_ball.global_position
 	path_follow.remove_child(flame_ball)
 	flame_ball_parent.add_child(flame_ball)
-	flame_ball.global_position = position
+	flame_ball.global_position = fbgp
 	flame_ball.start_following_paths()
 
 	path_follow.queue_free()
