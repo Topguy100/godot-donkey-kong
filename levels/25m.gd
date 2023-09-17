@@ -12,5 +12,5 @@ func mario_died():
 	for node in get_tree().get_nodes_in_group("freezable"):
 		node.freeze(true)
 
-func _on_win_location_body_entered(body):
+func _on_win_location_body_entered(_body):
 	print("You won!")
