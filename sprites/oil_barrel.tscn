@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://tocme2b462e1"]
+[gd_scene load_steps=9 format=3 uid="uid://tocme2b462e1"]
 
 [ext_resource type="Texture2D" uid="uid://bbj3i45e4l3bb" path="res://assets/objects/Oil Barrel.png" id="1_3s47q"]
 [ext_resource type="Script" path="res://sprites/oil_barrel.gd" id="2_4wvaq"]
@@ -63,7 +63,13 @@ _data = {
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xeu31"]
 size = Vector2(3, 96)
 
-[node name="Oil Barrel" type="Sprite2D"]
+[sub_resource type="Curve2D" id="Curve2D_n372w"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 0, 0, -21.2132, -4.59619, 24.4636, 5.30044, 33, -18, 0, 0, 0, 0, 60, 36)
+}
+point_count = 3
+
+[node name="Oil Barrel" type="Sprite2D" groups=["freezable"]]
 texture = ExtResource("1_3s47q")
 hframes = 5
 script = ExtResource("2_4wvaq")
@@ -85,8 +91,8 @@ collision_mask = 17
 position = Vector2(19.5, 0)
 shape = SubResource("RectangleShape2D_xeu31")
 
-[node name="Flame Ball Spawn Location" type="Marker2D" parent="."]
-position = Vector2(60, 36)
+[node name="Initial Path" type="Path2D" parent="."]
+curve = SubResource("Curve2D_n372w")
 
 [connection signal="timeout" from="IgniteTimer" to="." method="_on_ignite_timer_timeout"]
 [connection signal="body_entered" from="CollisionArea" to="." method="_on_collision_area_body_entered"]
