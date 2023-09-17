@@ -11,3 +11,6 @@ func mario_died():
 	background_music.stop()
 	for node in get_tree().get_nodes_in_group("freezable"):
 		node.freeze(true)
+
+func _on_win_location_body_entered(body):
+	print("You won!")
